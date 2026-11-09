@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 fun ChaduckTheme(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = LightColorScheme,
+        typography = ChaduckTypography,
         content = content
     )
 }

@@ -1,0 +1,29 @@
+# macOS
+.DS_Store
+
+# IDE
+*.iml
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+
+# Gradle / Android build
+.gradle/
+build/
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+
+# 서명 키
+*.jks
+*.keystore
+keystore.properties
+
+# 개인 작업용 (Claude Code 설정, 문서)
+CLAUDE.md
+.claude/
+docs/

@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- 차덕 서버와 통신한다. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".DontSpillApplication"
         android:allowBackup="true"

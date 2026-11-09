@@ -6,18 +6,18 @@ plugins {
     alias(libs.plugins.hilt)
 }
 
+val targetAndroidSdk = 35
+
 android {
     namespace = "com.yozmpeople.dontspill"
     compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
+        version = release(targetAndroidSdk)
     }
 
     defaultConfig {
         applicationId = "com.yozmpeople.dontspill"
         minSdk = 28
-        targetSdk = 36
+        targetSdk = targetAndroidSdk
         versionCode = 1
         versionName = "1.0"
 
@@ -40,6 +40,12 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
+    }
+    // JVM 단위 테스트에서 android.jar 메서드(Log.d 등)가 예외 대신 기본값을 돌려주게 한다.
+    // debugLog가 상태 변화 때 Log.d를 불러도 판단 로직 테스트가 멈추지 않는다.
+    testOptions {
+        unitTests.isReturnDefaultValues = true
     }
 }
 

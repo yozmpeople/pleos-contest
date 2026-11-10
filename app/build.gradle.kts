@@ -1,6 +1,3 @@
-import com.android.build.api.variant.BuildConfigField
-import java.util.Properties
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -10,24 +7,6 @@ plugins {
 }
 
 val targetAndroidSdk = 35
-
-val debugFallbackBaseUrl = "https://example.invalid/"
-
-// user.home 아래 비밀 파일 경로.
-val secretsFile = File(System.getProperty("user.home"), ".chaduck-secrets/secrets.properties")
-
-// 비밀 파일 내용을 Properties로 읽는다. 파일이 없으면 빈 Properties.
-val secretProperties: Provider<Properties> =
-    providers.fileContents(layout.projectDirectory.file(secretsFile.path)).asText
-        .map { text -> Properties().apply { load(text.reader()) } }
-        .orElse(Properties())
-
-fun baseUrlProvider(key: String, fallback: String?): Provider<String> = secretProperties.map { properties ->
-    val url = properties.getProperty(key) ?: fallback
-        ?: throw GradleException("비밀 파일에 $key 값을 넣어 주세요. 예: $key=https://<서버 주소>/")
-    if (!url.endsWith("/")) throw GradleException("비밀 파일의 $key 값은 /로 끝나야 합니다.")
-    url
-}
 
 android {
     namespace = "com.yozmpeople.dontspill"
@@ -70,20 +49,6 @@ android {
     }
 }
 
-androidComponents {
-    onVariants { variant ->
-        val buildType = variant.buildType ?: return@onVariants
-        val fallback = if (buildType == "debug") debugFallbackBaseUrl else null
-        // 값 검사는 해당 빌드의 BuildConfig를 만들 때만 한다. debug 빌드가 release 값 때문에 실패하지 않게 한다.
-        variant.buildConfigFields?.put(
-            "CHADUCK_BASE_URL",
-            baseUrlProvider("chaduck.baseUrl.$buildType", fallback).map {
-                BuildConfigField("String", "\"$it\"", "서버 기본 주소")
-            }
-        )
-    }
-}
-
 dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
@@ -109,12 +74,6 @@ dependencies {
     // Coroutines · Serialization
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization.json)
-
-    // Ktor
-    implementation(libs.ktor.client.core)
-    implementation(libs.ktor.client.cio)
-    implementation(libs.ktor.client.content.negotiation)
-    implementation(libs.ktor.serialization.kotlinx.json)
 
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)

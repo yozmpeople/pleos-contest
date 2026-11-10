@@ -6,9 +6,11 @@ import android.car.hardware.CarPropertyValue
 import android.car.hardware.property.CarPropertyManager
 import android.content.Context
 import com.yozmpeople.dontspill.common.debugLog
+import com.yozmpeople.dontspill.data.vehicle.model.VehicleReading
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Duration.Companion.nanoseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
@@ -25,12 +27,6 @@ import kotlinx.coroutines.withTimeoutOrNull
 private const val TAG = "CarPropertySource"
 private const val GLOBAL_AREA_ID = 0
 private val CONNECT_TIMEOUT = 10.seconds
-
-// AAOS 프로퍼티 값 1건. timestampNanos는 CarPropertyValue.timestamp(부팅 후 경과시간, ns) 그대로다.
-data class RawCarValue<out T>(
-    val timestampNanos: Long,
-    val value: T
-)
 
 // AAOS CarPropertyManager로 차속·기어·시동을 구독하고, 차량 외형 치수를 한 번 읽는다.
 // SDK 값을 그대로 내보내고, 앱 값으로 바꾸는 일은 저장소에서 한다.
@@ -50,15 +46,15 @@ class CarPropertySource @Inject constructor(@ApplicationContext context: Context
     }
 
     // 부호 있는 차속(m/s). 후진이면 음수
-    fun observeSpeed(): Flow<RawCarValue<Float>> =
+    fun observeSpeed(): Flow<VehicleReading<Float>> =
         observe(VehiclePropertyIds.PERF_VEHICLE_SPEED, CarPropertyManager.SENSOR_RATE_UI).castValues()
 
     // VehicleGear 값
-    fun observeGear(): Flow<RawCarValue<Int>> =
+    fun observeGear(): Flow<VehicleReading<Int>> =
         observe(VehiclePropertyIds.GEAR_SELECTION, CarPropertyManager.SENSOR_RATE_ONCHANGE).castValues()
 
     // VehicleIgnitionState 값
-    fun observeIgnition(): Flow<RawCarValue<Int>> =
+    fun observeIgnition(): Flow<VehicleReading<Int>> =
         observe(VehiclePropertyIds.IGNITION_STATE, CarPropertyManager.SENSOR_RATE_ONCHANGE).castValues()
 
     // INFO_EXTERIOR_DIMENSIONS 배열(mm). 연결되지 않았거나 읽지 못하면 null
@@ -69,13 +65,13 @@ class CarPropertySource @Inject constructor(@ApplicationContext context: Context
     }
 
     // 연결이 바뀌면 새 CarPropertyManager로 다시 구독한다.
-    private fun observe(propertyId: Int, rate: Float): Flow<RawCarValue<Any?>> =
+    private fun observe(propertyId: Int, rate: Float): Flow<VehicleReading<Any?>> =
         propertyManager.flatMapLatest { manager -> manager?.events(propertyId, rate) ?: emptyFlow() }
 
-    private fun CarPropertyManager.events(propertyId: Int, rate: Float): Flow<RawCarValue<Any?>> = callbackFlow {
+    private fun CarPropertyManager.events(propertyId: Int, rate: Float): Flow<VehicleReading<Any?>> = callbackFlow {
         val callback = object : CarPropertyManager.CarPropertyEventCallback {
             override fun onChangeEvent(value: CarPropertyValue<*>) {
-                if (value.isAvailable()) trySend(RawCarValue(value.timestamp, value.value))
+                if (value.isAvailable()) trySend(VehicleReading(value.timestampMs(), value.value))
             }
 
             override fun onErrorEvent(propId: Int, zone: Int) {
@@ -105,9 +101,12 @@ class CarPropertySource @Inject constructor(@ApplicationContext context: Context
         withTimeoutOrNull(CONNECT_TIMEOUT) { propertyManager.filterNotNull().first() }
 }
 
+// CarPropertyValue.timestamp는 부팅 후 경과시간(ns)이다. elapsedRealtimeNanos와 같은 기준으로 본다 (추정).
+private fun CarPropertyValue<*>.timestampMs(): Long = timestamp.nanoseconds.inWholeMilliseconds
+
 // API 35 미만 기기에는 getPropertyStatus()가 없어서 deprecated된 getStatus()를 쓴다.
 @Suppress("DEPRECATION")
 private fun CarPropertyValue<*>.isAvailable(): Boolean = status == CarPropertyValue.STATUS_AVAILABLE
 
-private inline fun <reified T> Flow<RawCarValue<Any?>>.castValues(): Flow<RawCarValue<T>> =
-    mapNotNull { raw -> (raw.value as? T)?.let { RawCarValue(raw.timestampNanos, it) } }
+private inline fun <reified T> Flow<VehicleReading<Any?>>.castValues(): Flow<VehicleReading<T>> =
+    mapNotNull { raw -> (raw.value as? T)?.let { VehicleReading(raw.timestampMs, it) } }

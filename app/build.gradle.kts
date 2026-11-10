@@ -88,4 +88,5 @@ dependencies {
     implementation(libs.pleos.vehicle)
     implementation(libs.pleos.text.to.speech)
     implementation(libs.pleos.fused.location)
+    implementation(libs.pleos.navi.helper)
 }

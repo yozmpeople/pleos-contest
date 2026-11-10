@@ -2,6 +2,22 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- AAOS 표준 차량 프로퍼티 -->
+    <!-- 차속 (dangerous, 런타임 요청) -->
+    <uses-permission android:name="android.car.permission.CAR_SPEED" />
+    <!-- 기어, 시동 -->
+    <uses-permission android:name="android.car.permission.CAR_POWERTRAIN" />
+    <!-- 축거 -->
+    <uses-permission android:name="android.car.permission.CAR_INFO" />
+
+    <!-- Pleos Vehicle SDK -->
+    <!-- 하향등, 상향등 -->
+    <uses-permission android:name="pleos.car.permission.CAR_LIGHTS" />
+    <!-- 와이퍼 -->
+    <uses-permission android:name="pleos.car.permission.CAR_WINDOWS" />
+    <!-- 전륜각 -->
+    <uses-permission android:name="pleos.car.permission.CAR_DRIVE" />
+
     <application
         android:name=".DontSpillApplication"
         android:allowBackup="true"

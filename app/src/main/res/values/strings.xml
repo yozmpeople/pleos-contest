@@ -17,6 +17,15 @@
     <string name="driving_end">주행 종료하기</string>
     <string name="driving_guide">자동으로 주행이 종료되지 않는 경우, 버튼을 눌러 주행을 종료해 주세요</string>
 
+    <string name="help_title">도움말</string>
+    <string name="help_back">뒤로 가기</string>
+    <string name="help_previous">이전 페이지</string>
+    <string name="help_next">다음 페이지</string>
+    <string name="help_page_number">%1$d/%2$d</string>
+    <string name="help_skin">원하는 스킨을 선택하고 주행을 시작해 주세요.</string>
+    <string name="help_result">과속, 급가속, 급감속 등 항목에 따라 안전 운전 점수가 감점됩니다.</string>
+    <string name="help_leaderboard">운전이 종료되면 결과를 확인해 주세요. 점수는 합산되어 주간 순위에 반영됩니다.</string>
+
     <string name="character_water_cup_name">찰랑찰랑 물컵이</string>
     <string name="character_water_cup_speech">급하게 달리면 쏟아져!</string>
     <string name="character_tofu_name">뭉게뭉게 순두부</string>

@@ -3,6 +3,8 @@
     <string name="driving_notification_channel">주행 기록</string>
     <string name="driving_notification_title">주행을 기록하고 있어요</string>
 
+    <string name="splash_title">쏟지마! 물컵!</string>
+
     <string name="character_water_cup_name">찰랑찰랑 물컵이</string>
     <string name="character_water_cup_speech">급하게 달리면 쏟아져!</string>
     <string name="character_tofu_name">뭉게뭉게 순두부</string>

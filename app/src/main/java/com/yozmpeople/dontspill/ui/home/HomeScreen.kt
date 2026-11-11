@@ -125,10 +125,6 @@ private val NameRowMinSpacing = 1.dp
 // 점수 패널 오른쪽은 트로피 자리라 글자는 왼쪽부터 놓는다. 위아래는 가운데다(가로 31, 세로 30). (사용자, 2026-11-11)
 private val ScoreTextSpacing = 16.dp
 
-// 말풍선 이미지 아래쪽은 꼬리라 글자를 위로 올린다. 위 30, 아래 50 (사용자, 2026-11-11)
-private val SpeechTextTopPadding = 30.dp
-private val SpeechTextBottomPadding = 50.dp
-
 // 시안 수치 (사용자, 2026-11-11)
 private val SpeechFontSize = 32.sp
 private val SpeechLineHeight = 32.sp
@@ -340,7 +336,6 @@ private fun SpeechBubble(text: String, modifier: Modifier = Modifier) {
     ImagePanel(R.drawable.img_panel_speechbubble, SpeechBubbleSize, modifier) {
         Text(
             text = text,
-            modifier = Modifier.padding(top = SpeechTextTopPadding.scaled, bottom = SpeechTextBottomPadding.scaled),
             style = MaterialTheme.typography.textBold.copy(
                 fontSize = SpeechFontSize,
                 lineHeight = SpeechLineHeight,

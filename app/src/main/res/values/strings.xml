@@ -32,6 +32,9 @@
     <string name="leaderboard_title">%1$d월 %2$d주차 순위</string>
     <string name="leaderboard_score">%1$d 점</string>
 
+    <string name="result_grade_perfect">PERFECT</string>
+    <string name="result_grade_good">GOOD</string>
+    <string name="result_grade_bad">BAD</string>
     <string name="character_water_cup_name">찰랑찰랑 물컵이</string>
     <string name="character_water_cup_speech">급하게 달리면 쏟아져!</string>
     <string name="character_tofu_name">뭉게뭉게 순두부</string>

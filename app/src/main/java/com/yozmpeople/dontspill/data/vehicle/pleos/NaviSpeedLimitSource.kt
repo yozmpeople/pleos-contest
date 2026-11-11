@@ -1,4 +1,4 @@
-package com.yozmpeople.dontspill.data.vehicle.navi
+package com.yozmpeople.dontspill.data.vehicle.pleos
 
 import ai.pleos.playground.navi.helper.NaviHelper
 import ai.pleos.playground.navi.helper.listener.NaviHelperEventListener

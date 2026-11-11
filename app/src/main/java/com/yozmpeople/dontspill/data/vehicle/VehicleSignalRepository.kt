@@ -5,7 +5,7 @@ import com.yozmpeople.dontspill.data.vehicle.aaos.CarPropertySource
 import com.yozmpeople.dontspill.data.vehicle.model.Gear
 import com.yozmpeople.dontspill.data.vehicle.model.IgnitionState
 import com.yozmpeople.dontspill.data.vehicle.model.VehicleReading
-import com.yozmpeople.dontspill.data.vehicle.navi.NaviSpeedLimitSource
+import com.yozmpeople.dontspill.data.vehicle.pleos.NaviSpeedLimitSource
 import com.yozmpeople.dontspill.data.vehicle.pleos.PleosVehicleSource
 import javax.inject.Inject
 import javax.inject.Singleton

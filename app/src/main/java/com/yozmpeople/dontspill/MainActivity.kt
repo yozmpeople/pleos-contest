@@ -23,8 +23,11 @@ import kotlinx.coroutines.launch
 
 private const val TAG = "VehicleSignals"
 
+// FusedLocation SDK의 PleosPermission은 runtime 의존성(fused-location-data)에 있어 컴파일 때 쓸 수 없다.
+private const val FUSED_LOCATION_PERMISSION = "pleos.car.permission.FUSED_LOCATION"
+
 // 보호 수준을 모르는 권한도 함께 요청한다. normal 권한은 요청하면 바로 허용으로 온다.
-// 위치는 주행 기록 서비스(location 타입)를 띄우는 데 필요하다.
+// 위치는 Pleos FusedLocation으로 받는다. Android 위치는 주행 기록 서비스(location 타입)를 띄우는 데 필요하다.
 private val REQUIRED_PERMISSIONS = arrayOf(
     Car.PERMISSION_SPEED,
     Car.PERMISSION_POWERTRAIN,
@@ -32,6 +35,7 @@ private val REQUIRED_PERMISSIONS = arrayOf(
     PleosPermission.CAR_LIGHTS,
     PleosPermission.CAR_WINDOWS,
     PleosPermission.CAR_DRIVE,
+    FUSED_LOCATION_PERMISSION,
     Manifest.permission.ACCESS_COARSE_LOCATION,
     Manifest.permission.ACCESS_FINE_LOCATION
 )

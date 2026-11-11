@@ -1,7 +1,5 @@
 package com.yozmpeople.dontspill.ui.home
 
-import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,7 +17,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -42,6 +39,7 @@ import com.yozmpeople.dontspill.common.PleosPortraitPreviews
 import com.yozmpeople.dontspill.ui.character.Character
 import com.yozmpeople.dontspill.ui.component.AppContentFrame
 import com.yozmpeople.dontspill.ui.component.CharacterBackground
+import com.yozmpeople.dontspill.ui.component.ImageButton
 import com.yozmpeople.dontspill.ui.component.ImagePanel
 import com.yozmpeople.dontspill.ui.component.InfoGuide
 import com.yozmpeople.dontspill.ui.component.WindowLayout
@@ -385,7 +383,12 @@ private fun CharacterNameRow(character: Character, dimens: HomeDimens, onPreviou
         horizontalArrangement = Arrangement.spacedBy(dimens.arrowButtonSpacing.scaled),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        ArrowButton(R.drawable.img_button_previous, R.string.home_previous_character, onPrevious)
+        ImageButton(
+            R.drawable.img_button_previous,
+            stringResource(R.string.home_previous_character),
+            ArrowButtonSize,
+            onPrevious
+        )
         ImagePanel(R.drawable.img_panel_title, dimens.namePanelSize) {
             Text(
                 text = stringResource(character.displayNameRes),
@@ -397,21 +400,8 @@ private fun CharacterNameRow(character: Character, dimens: HomeDimens, onPreviou
                 color = ChaduckColors.Primary.Normal
             )
         }
-        ArrowButton(R.drawable.img_button_next, R.string.home_next_character, onNext)
+        ImageButton(R.drawable.img_button_next, stringResource(R.string.home_next_character), ArrowButtonSize, onNext)
     }
-}
-
-// 배율로 작아져도 터치 영역은 최소 크기(48dp) 아래로 줄이지 않는다.
-@Composable
-private fun ArrowButton(@DrawableRes imageRes: Int, @StringRes descriptionRes: Int, onClick: () -> Unit) {
-    Image(
-        painter = painterResource(imageRes),
-        contentDescription = stringResource(descriptionRes),
-        modifier = Modifier
-            .minimumInteractiveComponentSize()
-            .clickable(onClick = onClick)
-            .size(ArrowButtonSize.scaled)
-    )
 }
 
 @Composable

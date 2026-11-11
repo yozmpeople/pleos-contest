@@ -9,30 +9,35 @@ enum class Character(
     @StringRes val displayNameRes: Int,
     @StringRes val speechRes: Int,
     @DrawableRes val imageRes: Int,
+    @DrawableRes val drivingImageRes: Int,
     @DrawableRes val backgroundRes: Int
 ) {
     WaterCup(
         R.string.character_water_cup_name,
         R.string.character_water_cup_speech,
         R.drawable.img_watercup_main,
+        R.drawable.img_watercup_driving,
         R.drawable.img_skin_watercup
     ),
     Tofu(
         R.string.character_tofu_name,
         R.string.character_tofu_speech,
         R.drawable.img_tofu_main,
+        R.drawable.img_tofu_driving,
         R.drawable.img_skin_tofu
     ),
     Sunfish(
         R.string.character_sunfish_name,
         R.string.character_sunfish_speech,
         R.drawable.img_sunfish_main,
+        R.drawable.img_sunfish_driving,
         R.drawable.img_skin_sunfish
     ),
     Laika(
         R.string.character_laika_name,
         R.string.character_laika_speech,
         R.drawable.img_laika_main,
+        R.drawable.img_laika_driving,
         R.drawable.img_skin_laika
     );
 

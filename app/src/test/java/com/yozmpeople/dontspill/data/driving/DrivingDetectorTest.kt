@@ -67,54 +67,42 @@ class DrivingDetectorTest {
     }
 
     @Test
-    fun `정차가 5분 이어지면 드라이빙이 끝난다`() = runTest {
+    fun `P에 넣으면 주행 중이어도 바로 끝난다`() = runTest {
         val detector = startDriving()
 
         vehicle.stop()
-        waitMs(1)
-        assertEquals(DrivingState.Stopped(startedAtMs = 0, stoppedAtMs = 5_000), detector.state.value)
+        waitMs(60_000)
+        vehicle.gear(Gear.PARK)
+        waitMs(0)
 
-        waitMs(299_998)
-        assertEquals(DrivingState.Stopped(startedAtMs = 0, stoppedAtMs = 5_000), detector.state.value)
-
-        waitMs(1)
         assertEquals(DrivingState.Idle, detector.state.value)
     }
 
     @Test
-    fun `정차 4분 59초에 다시 출발하면 같은 드라이빙을 이어간다`() = runTest {
+    fun `P가 아니면 오래 정차해도 주행을 이어간다`() = runTest {
         val detector = startDriving()
 
         vehicle.stop()
-        waitMs(299_000)
-        vehicle.move()
-        waitMs(5_000)
+        waitMs(600_000)
         assertEquals(DrivingState.Driving(startedAtMs = 0), detector.state.value)
 
+        vehicle.move()
         waitMs(10_000)
         assertEquals(DrivingState.Driving(startedAtMs = 0), detector.state.value)
     }
 
     @Test
-    fun `정차 중 5초 미만으로 움직이면 5분을 다시 세고 정차 시작 시각은 그대로다`() = runTest {
+    fun `P로 끝난 뒤 다시 출발하면 새 드라이빙이다`() = runTest {
         val detector = startDriving()
 
-        // 5,000ms에 정차, 105,000ms에 움직임, 108,000ms에 다시 정차
+        // 5,000ms에 P, 15,000ms에 출발, 20,000ms에 주행
         vehicle.stop()
-        waitMs(100_000)
+        vehicle.gear(Gear.PARK)
+        waitMs(10_000)
         vehicle.move()
-        waitMs(3_000)
-        vehicle.stop()
+        waitMs(5_000)
 
-        // 처음 정차부터 5분(305,000ms)이 지나도 끝나지 않는다.
-        waitMs(197_000)
-        assertEquals(DrivingState.Stopped(startedAtMs = 0, stoppedAtMs = 5_000), detector.state.value)
-
-        // 다시 멈춘 때부터 5분(408,000ms)이 되면 끝난다.
-        waitMs(102_999)
-        assertEquals(DrivingState.Stopped(startedAtMs = 0, stoppedAtMs = 5_000), detector.state.value)
-        waitMs(1)
-        assertEquals(DrivingState.Idle, detector.state.value)
+        assertEquals(DrivingState.Driving(startedAtMs = 15_000), detector.state.value)
     }
 
     @Test

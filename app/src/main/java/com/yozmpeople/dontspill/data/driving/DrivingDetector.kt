@@ -10,7 +10,6 @@ import com.yozmpeople.dontspill.data.vehicle.model.IgnitionState
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.abs
-import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -27,7 +26,6 @@ import kotlinx.coroutines.launch
 
 // 06 지시서 "주행 상태 기준"의 시간
 private val DRIVING_CONFIRM_DURATION = 5.seconds
-private val STOPPED_TIMEOUT = 5.minutes
 
 private const val TAG = "DrivingDetector"
 
@@ -68,30 +66,18 @@ class DrivingDetector @Inject constructor(
     // collectLatest라서 신호가 바뀌면 진행 중인 delay가 취소된다.
     private suspend fun onSignal(signal: Signal) {
         when (signal) {
-            Signal.IGNITION_OFF -> moveTo(DrivingState.Idle)
+            Signal.IGNITION_OFF, Signal.PARKED -> moveTo(DrivingState.Idle)
 
-            // 움직임이 5초 이어져야 주행으로 본다. 정차 중에 다시 움직이면 같은 드라이빙을 이어간다.
+            // 움직임이 5초 이어져야 주행으로 본다.
             Signal.MOVING -> {
-                val current = _state.value
-                if (current is DrivingState.Driving) return
+                if (_state.value is DrivingState.Driving) return
                 val movingSinceMs = clock.nowMs()
                 delay(DRIVING_CONFIRM_DURATION)
-                val startedAtMs = (current as? DrivingState.Stopped)?.startedAtMs ?: movingSinceMs
-                moveTo(DrivingState.Driving(startedAtMs))
+                moveTo(DrivingState.Driving(movingSinceMs))
             }
 
-            // 정차가 5분 이어지면 드라이빙을 끝낸다.
-            // 정차 중 5초 미만으로 움직였다 멈추면 5분을 처음부터 다시 센다. 정차 시작 시각은 그대로 둔다.
-            Signal.NOT_MOVING -> {
-                val stopped = when (val current = _state.value) {
-                    DrivingState.Idle -> return
-                    is DrivingState.Driving -> DrivingState.Stopped(current.startedAtMs, clock.nowMs())
-                    is DrivingState.Stopped -> current
-                }
-                moveTo(stopped)
-                delay(STOPPED_TIMEOUT)
-                moveTo(DrivingState.Idle)
-            }
+            // P가 아니면 얼마나 서 있어도 주행을 이어간다. 대기 중이면 5초 확인만 취소된다.
+            Signal.STILL -> Unit
         }
     }
 
@@ -105,15 +91,18 @@ class DrivingDetector @Inject constructor(
 
 private enum class Signal {
     IGNITION_OFF,
+    PARKED,
     MOVING,
-    NOT_MOVING
+    STILL
 }
 
 // - 시동은 OFF·LOCK만 꺼짐으로 본다. UNKNOWN(값 없음)과 ACC는 꺼짐이 아니다.
 // - 주행은 Pleos Driving 정의(기어 P 아님 + 속도 > 0)를 따른다. 기어 UNKNOWN도 P 아님이다.
+//   그래서 기어 값이 오지 않으면 P 진입으로 끝나지 않고, 시동 OFF로만 끝난다.
 // - 차속은 절댓값으로 본다. 후진이면 음수다.
 private fun toSignal(gear: Gear, speedMps: Double, ignition: IgnitionState): Signal = when {
     ignition == IgnitionState.OFF || ignition == IgnitionState.LOCK -> Signal.IGNITION_OFF
-    gear != Gear.PARK && abs(speedMps) > 0.0 -> Signal.MOVING
-    else -> Signal.NOT_MOVING
+    gear == Gear.PARK -> Signal.PARKED
+    abs(speedMps) > 0.0 -> Signal.MOVING
+    else -> Signal.STILL
 }

@@ -2,4 +2,13 @@
     <string name="app_name">DontSpill</string>
     <string name="driving_notification_channel">주행 기록</string>
     <string name="driving_notification_title">주행을 기록하고 있어요</string>
+
+    <string name="character_water_cup_name">찰랑찰랑 물컵이</string>
+    <string name="character_water_cup_speech">급하게 달리면 쏟아져!</string>
+    <string name="character_tofu_name">뭉게뭉게 순두부</string>
+    <string name="character_tofu_speech">뭉개지지 않게 조심해줘!</string>
+    <string name="character_sunfish_name">위기탈출 개복치</string>
+    <string name="character_sunfish_speech">나는 깜짝깜짝 잘 놀라!</string>
+    <string name="character_laika_name">우주여행 라이카</string>
+    <string name="character_laika_speech">무사히 여행할 수 있을까?</string>
 </resources>

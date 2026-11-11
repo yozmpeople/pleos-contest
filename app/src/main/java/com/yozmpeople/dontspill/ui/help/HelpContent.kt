@@ -43,10 +43,12 @@ import com.yozmpeople.dontspill.R
 import com.yozmpeople.dontspill.common.PleosPreviews
 import com.yozmpeople.dontspill.ui.character.Character
 import com.yozmpeople.dontspill.ui.component.AppContentFrame
+import com.yozmpeople.dontspill.ui.component.BackButton
 import com.yozmpeople.dontspill.ui.component.CharacterBackground
 import com.yozmpeople.dontspill.ui.component.DesignScaleBox
 import com.yozmpeople.dontspill.ui.component.ImageButton
 import com.yozmpeople.dontspill.ui.component.ImagePanel
+import com.yozmpeople.dontspill.ui.component.TitlePanel
 import com.yozmpeople.dontspill.ui.component.WindowLayout
 import com.yozmpeople.dontspill.ui.component.currentWindowLayout
 import com.yozmpeople.dontspill.ui.component.scaled
@@ -165,8 +167,8 @@ fun HelpContent(
             .padding(padding)
     ) {
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-            BackButton(dimens, onBack, Modifier.align(Alignment.CenterStart))
-            TitlePanel(dimens)
+            BackButton(dimens.backButtonSize, onBack, Modifier.align(Alignment.CenterStart))
+            TitlePanel(stringResource(R.string.help_title), dimens.titlePanelSize, dimens.titleFontSize)
         }
         Spacer(Modifier.height(dimens.cardTopSpacing.scaled))
         CardArea(
@@ -176,32 +178,6 @@ fun HelpContent(
             dimens = dimens,
             onPrevious = onPrevious,
             onNext = onNext
-        )
-    }
-}
-
-@Composable
-private fun BackButton(dimens: HelpDimens, onBack: () -> Unit, modifier: Modifier = Modifier) {
-    ImageButton(
-        imageRes = R.drawable.img_button_back,
-        contentDescription = stringResource(R.string.help_back),
-        size = dimens.backButtonSize,
-        onClick = onBack,
-        modifier = modifier
-    )
-}
-
-@Composable
-private fun TitlePanel(dimens: HelpDimens) {
-    ImagePanel(R.drawable.img_panel_title, dimens.titlePanelSize) {
-        Text(
-            text = stringResource(R.string.help_title),
-            style = MaterialTheme.typography.textTitle.copy(
-                fontSize = dimens.titleFontSize,
-                lineHeight = dimens.titleFontSize,
-                textAlign = TextAlign.Center
-            ).scaled(),
-            color = ChaduckColors.Primary.Normal
         )
     }
 }

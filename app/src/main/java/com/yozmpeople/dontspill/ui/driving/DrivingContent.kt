@@ -1,7 +1,6 @@
 package com.yozmpeople.dontspill.ui.driving
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -11,15 +10,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.TextUnit
@@ -31,14 +26,13 @@ import com.yozmpeople.dontspill.common.PleosPortraitPreviews
 import com.yozmpeople.dontspill.ui.character.Character
 import com.yozmpeople.dontspill.ui.component.AppContentFrame
 import com.yozmpeople.dontspill.ui.component.CharacterBackground
-import com.yozmpeople.dontspill.ui.component.ImagePanel
 import com.yozmpeople.dontspill.ui.component.InfoGuide
+import com.yozmpeople.dontspill.ui.component.PillButton
+import com.yozmpeople.dontspill.ui.component.TitlePanel
 import com.yozmpeople.dontspill.ui.component.WindowLayout
 import com.yozmpeople.dontspill.ui.component.currentWindowLayout
 import com.yozmpeople.dontspill.ui.component.scaled
-import com.yozmpeople.dontspill.ui.theme.ChaduckColors
 import com.yozmpeople.dontspill.ui.theme.ChaduckTheme
-import com.yozmpeople.dontspill.ui.theme.textTitle
 
 // 가로·세로 시안에서 크기만 다른 요소의 수치
 private class DrivingDimens(
@@ -112,17 +106,7 @@ fun DrivingContent(
             .padding(padding),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        ImagePanel(R.drawable.img_panel_title, dimens.timePanelSize) {
-            Text(
-                text = formatDrivingTime(uiState.elapsedSeconds),
-                style = MaterialTheme.typography.textTitle.copy(
-                    fontSize = dimens.timeFontSize,
-                    lineHeight = dimens.timeFontSize,
-                    textAlign = TextAlign.Center
-                ).scaled(),
-                color = ChaduckColors.Primary.Normal
-            )
-        }
+        TitlePanel(formatDrivingTime(uiState.elapsedSeconds), dimens.timePanelSize, dimens.timeFontSize)
         Spacer(Modifier.height(dimens.characterTopSpacing.scaled))
         Box(
             modifier = Modifier
@@ -137,21 +121,7 @@ fun DrivingContent(
             )
         }
         Spacer(Modifier.height(dimens.endButtonTopSpacing.scaled))
-        ImagePanel(
-            imageRes = R.drawable.img_panel_button,
-            size = dimens.endButtonSize,
-            modifier = Modifier.clickable(role = Role.Button, onClick = onEndDriving)
-        ) {
-            Text(
-                text = stringResource(R.string.driving_end),
-                style = MaterialTheme.typography.textTitle.copy(
-                    fontSize = dimens.endButtonFontSize,
-                    lineHeight = dimens.endButtonFontSize,
-                    textAlign = TextAlign.Center
-                ).scaled(),
-                color = ChaduckColors.Background.Normal
-            )
-        }
+        PillButton(stringResource(R.string.driving_end), dimens.endButtonSize, dimens.endButtonFontSize, onEndDriving)
         Spacer(Modifier.height(dimens.guideTopSpacing.scaled))
         InfoGuide(stringResource(R.string.driving_guide), dimens.guideIconSize, dimens.guideFontSize)
     }

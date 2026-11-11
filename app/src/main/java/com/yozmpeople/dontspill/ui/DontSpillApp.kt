@@ -76,14 +76,12 @@ fun DontSpillApp(characterRepository: CharacterRepository, viewModel: AppViewMod
                 )
             } else {
                 when (screen) {
-                    // 업적·주행 기록 화면은 아직 없다. 해당 화면을 만들 때 연결한다.
                     AppScreen.Home -> HomeScreen(
                         contentPadding = contentPadding,
                         onTopButtonClick = { button ->
                             when (button) {
                                 HomeTopButton.Help -> screen = AppScreen.Help
                                 HomeTopButton.Leaderboard -> screen = AppScreen.Leaderboard
-                                else -> Unit
                             }
                         }
                     )

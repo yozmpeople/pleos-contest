@@ -49,10 +49,7 @@ fun DontSpillApp(characterRepository: CharacterRepository) {
                 // 상단 버튼의 화면은 아직 없다. 해당 화면을 만들 때 연결한다.
                 HomeScreen(
                     contentPadding = contentPadding,
-                    onAchievementClick = {},
-                    onHelpClick = {},
-                    onLeaderboardClick = {},
-                    onHistoryClick = {}
+                    onTopButtonClick = {}
                 )
             }
         }

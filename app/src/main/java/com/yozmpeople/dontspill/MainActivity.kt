@@ -8,13 +8,14 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.material3.Text
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.yozmpeople.dontspill.common.debugLog
 import com.yozmpeople.dontspill.data.vehicle.VehicleSignalRepository
 import com.yozmpeople.dontspill.service.DrivingMonitorService
+import com.yozmpeople.dontspill.ui.DontSpillApp
+import com.yozmpeople.dontspill.ui.character.CharacterRepository
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.flow.map
@@ -46,6 +47,9 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var vehicleSignalRepository: VehicleSignalRepository
 
+    @Inject
+    lateinit var characterRepository: CharacterRepository
+
     private val permissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
             debugLog(TAG) { "permissions $result" }
@@ -54,9 +58,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // 화면은 03(화면 기반)·04(화면 UI)에서 만든다.
         setContent {
-            Text(text = getString(R.string.app_name))
+            DontSpillApp(characterRepository)
         }
 
         // 임시: 에뮬레이터에서 차량 신호를 확인하는 연결이다. 화면 지시서에서 대체한다.

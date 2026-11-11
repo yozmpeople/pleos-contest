@@ -57,6 +57,13 @@ class DrivingScoreCalculatorTest {
     }
 
     @Test
+    fun `야간에 상향등만 켜고 하향등을 끄면 전조등 미점등이다`() {
+        val result = calculator.update(input(0.0, night = true, lowBeamOn = false, highBeamOn = true))
+
+        assertOccurred(result, PenaltyFactor.HEADLIGHTS_OFF_AT_NIGHT, count = 1, score = 90)
+    }
+
+    @Test
     fun `강수량 10mm에서 와이퍼를 쓰지 않으면 첫 발생 즉시 90점`() {
         val result = calculator.update(input(0.0, rainfallMm = 10.0, wipersOn = false))
 

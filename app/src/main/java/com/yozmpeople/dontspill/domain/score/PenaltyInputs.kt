@@ -9,8 +9,8 @@ internal data class PenaltyInputs(
     // 현재 속력 − 정확히 3초 전 속력(km/h). 감속이면 음수
     val speedChangeKmh: Double? = null,
     val night: Boolean? = null,
-    // 하향등 또는 상향등이 켜져 있으면 true
-    val headlightsOn: Boolean? = null,
+    // 전조등 미점등은 하향등만 본다. 상향등만 켜도 미점등이다.
+    val lowBeamOn: Boolean? = null,
     val highBeamOn: Boolean? = null,
     // 최근 1시간 강수량이 기준 이상이면 true
     val heavyRain: Boolean? = null,

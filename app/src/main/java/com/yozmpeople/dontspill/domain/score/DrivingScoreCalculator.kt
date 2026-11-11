@@ -76,11 +76,7 @@ class DrivingScoreCalculator(
             speedLimitKmh = input.speedLimitKmh?.takeIf { it.isFinite() && it > 0 },
             speedChangeKmh = speedChange(input.timestampMs, speedKmh),
             night = input.night,
-            headlightsOn = when {
-                input.lowBeamOn == true || input.highBeamOn == true -> true
-                input.lowBeamOn == false && input.highBeamOn == false -> false
-                else -> null
-            },
+            lowBeamOn = input.lowBeamOn,
             highBeamOn = input.highBeamOn,
             heavyRain = input.rainfallMm
                 ?.takeIf { it.isFinite() && it >= 0 && it < MAX_VALID_RAINFALL_MM }

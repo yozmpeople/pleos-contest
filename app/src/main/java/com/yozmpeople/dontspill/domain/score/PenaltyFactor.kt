@@ -28,7 +28,7 @@ enum class PenaltyFactor(
         }
     },
     HEADLIGHTS_OFF_AT_NIGHT(penaltyPoints = 10, requiredDuration = Duration.ZERO, oncePerDriving = true) {
-        override fun condition(inputs: PenaltyInputs) = isRequiredButOff(inputs.night, inputs.headlightsOn)
+        override fun condition(inputs: PenaltyInputs) = isRequiredButOff(inputs.night, inputs.lowBeamOn)
     },
     WIPERS_OFF_IN_HEAVY_RAIN(penaltyPoints = 10, requiredDuration = Duration.ZERO, oncePerDriving = true) {
         override fun condition(inputs: PenaltyInputs) = isRequiredButOff(inputs.heavyRain, inputs.wipersOn)

@@ -31,7 +31,7 @@ class PenaltyFactorTest {
         val headlights = PenaltyFactor.HEADLIGHTS_OFF_AT_NIGHT
 
         assertEquals(NOT_MET, headlights.condition(PenaltyInputs(night = false)))
-        assertEquals(MET, headlights.condition(PenaltyInputs(night = true, headlightsOn = false)))
+        assertEquals(MET, headlights.condition(PenaltyInputs(night = true, lowBeamOn = false)))
         assertEquals(UNKNOWN, headlights.condition(PenaltyInputs(night = true)))
     }
 

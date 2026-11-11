@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">DontSpill</string>
+    <string name="driving_notification_channel">주행 기록</string>
+    <string name="driving_notification_title">주행을 기록하고 있어요</string>
 </resources>

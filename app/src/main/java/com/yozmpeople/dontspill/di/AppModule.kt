@@ -4,6 +4,7 @@ import android.os.SystemClock
 import com.yozmpeople.dontspill.common.ApplicationScope
 import com.yozmpeople.dontspill.common.ElapsedRealtimeClock
 import com.yozmpeople.dontspill.common.IoDispatcher
+import com.yozmpeople.dontspill.common.WallClock
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -29,4 +30,7 @@ object AppModule {
 
     @Provides
     fun provideElapsedRealtimeClock(): ElapsedRealtimeClock = ElapsedRealtimeClock { SystemClock.elapsedRealtime() }
+
+    @Provides
+    fun provideWallClock(): WallClock = WallClock { System.currentTimeMillis() }
 }

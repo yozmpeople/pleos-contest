@@ -9,7 +9,7 @@ import androidx.room3.PrimaryKey
 data class DrivingEntity(
     @PrimaryKey val drivingId: String,
     val startedAtMs: Long,
-    // 정차가 시작된 시각. 주행 중이면 null
+    // P 진입 또는 시동 OFF 시각. 주행 중이면 null
     val endedAtMs: Long?,
     val score: Int,
     // PenaltyFactor 이름 → 횟수 JSON

@@ -25,7 +25,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -43,13 +42,14 @@ import com.yozmpeople.dontspill.common.PleosPortraitPreviews
 import com.yozmpeople.dontspill.ui.character.Character
 import com.yozmpeople.dontspill.ui.component.AppContentFrame
 import com.yozmpeople.dontspill.ui.component.CharacterBackground
+import com.yozmpeople.dontspill.ui.component.ImagePanel
+import com.yozmpeople.dontspill.ui.component.InfoGuide
 import com.yozmpeople.dontspill.ui.component.WindowLayout
 import com.yozmpeople.dontspill.ui.component.currentWindowLayout
 import com.yozmpeople.dontspill.ui.component.scaled
 import com.yozmpeople.dontspill.ui.theme.ChaduckColors
 import com.yozmpeople.dontspill.ui.theme.ChaduckTheme
 import com.yozmpeople.dontspill.ui.theme.textBold
-import com.yozmpeople.dontspill.ui.theme.textSemiBold
 import com.yozmpeople.dontspill.ui.theme.textTitle
 
 // 가로·세로 시안에서 크기만 다른 요소의 수치
@@ -102,8 +102,6 @@ private val SideCharacterAlpha = 0.6f
 private val CarouselSpacing = 75.dp
 private val ArrowButtonSize = DpSize(81.dp, 80.dp)
 private val GuideTopSpacing = 73.dp
-private val GuideIconPadding = 1.dp
-private val GuideIconSpacing = 8.dp
 
 private val TopButtonSpacing = 8.dp
 private val SpeechBubbleTopSpacing = 80.dp
@@ -222,7 +220,7 @@ private fun LandscapeHomeContent(
         Spacer(Modifier.weight(1f))
         CharacterNameRow(uiState.character, dimens, onPrevious, onNext)
         Spacer(Modifier.height(GuideTopSpacing.scaled))
-        Guide(dimens)
+        InfoGuide(stringResource(R.string.home_guide), dimens.guideIconSize, dimens.guideFontSize)
     }
 }
 
@@ -275,7 +273,7 @@ private fun PortraitHomeContent(
             Spacer(Modifier.height(PortraitNameRowTopSpacing.scaled))
             CharacterNameRow(uiState.character, dimens, onPrevious, onNext)
             Spacer(Modifier.height(PortraitGuideTopSpacing.scaled))
-            Guide(dimens)
+            InfoGuide(stringResource(R.string.home_guide), dimens.guideIconSize, dimens.guideFontSize)
         }
         Column(
             modifier = Modifier.align(Alignment.TopEnd),
@@ -291,26 +289,6 @@ private fun Modifier.overlapBottom(overlap: Dp): Modifier = layout { measurable,
     val placeable = measurable.measure(constraints)
     val height = (placeable.height - overlap.roundToPx()).coerceAtLeast(0)
     layout(placeable.width, height) { placeable.place(0, 0) }
-}
-
-// 이미지 위에 글자를 얹는 패널. 이미지는 패널 크기에 맞춰 늘린다.
-@Composable
-private fun ImagePanel(
-    @DrawableRes imageRes: Int,
-    size: DpSize,
-    modifier: Modifier = Modifier,
-    contentAlignment: Alignment = Alignment.Center,
-    content: @Composable () -> Unit
-) {
-    Box(modifier = modifier.size(size.scaled), contentAlignment = contentAlignment) {
-        Image(
-            painter = painterResource(imageRes),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.FillBounds
-        )
-        content()
-    }
 }
 
 @Composable
@@ -439,29 +417,6 @@ private fun ArrowButton(@DrawableRes imageRes: Int, @StringRes descriptionRes: I
             .clickable(onClick = onClick)
             .size(ArrowButtonSize.scaled)
     )
-}
-
-@Composable
-private fun Guide(dimens: HomeDimens) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Image(
-            painter = painterResource(R.drawable.ic_circle_info),
-            contentDescription = null,
-            modifier = Modifier
-                .padding(GuideIconPadding.scaled)
-                .size(dimens.guideIconSize.scaled)
-        )
-        Spacer(Modifier.width(GuideIconSpacing.scaled))
-        Text(
-            text = stringResource(R.string.home_guide),
-            style = MaterialTheme.typography.textSemiBold.copy(
-                fontSize = dimens.guideFontSize,
-                lineHeight = dimens.guideFontSize,
-                textAlign = TextAlign.Center
-            ).scaled(),
-            color = ChaduckColors.Label.Normal
-        )
-    }
 }
 
 @Composable

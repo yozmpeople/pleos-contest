@@ -25,6 +25,9 @@
     <string name="help_skin">원하는 스킨을 선택하고 주행을 시작해 주세요.</string>
     <string name="help_result">과속, 급가속, 급감속 등 항목에 따라 안전 운전 점수가 감점됩니다.</string>
     <string name="help_leaderboard">운전이 종료되면 결과를 확인해 주세요. 점수는 합산되어 주간 순위에 반영됩니다.</string>
+    <string name="help_skin_portrait">원하는 스킨을 선택하고\n주행을 시작해 주세요.</string>
+    <string name="help_result_portrait">과속, 급가속, 급감속 등 항목에 따라\n안전 운전 점수가 감점됩니다.</string>
+    <string name="help_leaderboard_portrait">운전이 종료되면 결과를 확인해 주세요.\n점수는 합산되어 주간 순위에 반영됩니다.</string>
 
     <string name="character_water_cup_name">찰랑찰랑 물컵이</string>
     <string name="character_water_cup_speech">급하게 달리면 쏟아져!</string>

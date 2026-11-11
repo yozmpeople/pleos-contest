@@ -1,5 +1,15 @@
 package com.yozmpeople.dontspill.ui.home
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -27,6 +37,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -35,6 +46,7 @@ import androidx.compose.ui.zIndex
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.yozmpeople.dontspill.R
+import com.yozmpeople.dontspill.common.PleosLandscapePreviews
 import com.yozmpeople.dontspill.common.PleosPortraitPreviews
 import com.yozmpeople.dontspill.ui.character.Character
 import com.yozmpeople.dontspill.ui.component.AppContentFrame
@@ -49,6 +61,9 @@ import com.yozmpeople.dontspill.ui.theme.ChaduckColors
 import com.yozmpeople.dontspill.ui.theme.ChaduckTheme
 import com.yozmpeople.dontspill.ui.theme.textBold
 import com.yozmpeople.dontspill.ui.theme.textTitle
+
+// 캐릭터를 바꿀 때 애니메이션 시간 (추정)
+private const val CHARACTER_TRANSITION_MS = 300
 
 // 가로·세로 시안에서 크기만 다른 요소의 수치
 private class HomeDimens(
@@ -265,10 +280,16 @@ private fun PortraitHomeContent(
                     .fillMaxWidth(),
                 contentAlignment = Alignment.TopCenter
             ) {
-                SelectedCharacter(
-                    character = uiState.character,
-                    modifier = Modifier.aspectRatio(1f, matchHeightConstraintsFirst = true)
-                )
+                AnimatedContent(
+                    targetState = uiState.character,
+                    transitionSpec = { slideByDirection() },
+                    label = "selectedCharacter"
+                ) { character ->
+                    SelectedCharacter(
+                        character = character,
+                        modifier = Modifier.aspectRatio(1f, matchHeightConstraintsFirst = true)
+                    )
+                }
             }
             Spacer(Modifier.height(PortraitNameRowTopSpacing.scaled))
             CharacterNameRow(uiState.character, dimens, onPrevious, onNext)
@@ -338,30 +359,53 @@ private fun TopButtons(dimens: HomeDimens, onClick: (HomeTopButton) -> Unit) {
 @Composable
 private fun SpeechBubble(text: String, modifier: Modifier = Modifier) {
     ImagePanel(R.drawable.img_panel_speechbubble, SpeechBubbleSize, modifier) {
-        Text(
-            text = text,
-            modifier = Modifier.padding(top = SpeechTextTopPadding.scaled, bottom = SpeechTextBottomPadding.scaled),
-            style = MaterialTheme.typography.textBold.copy(
-                fontSize = SpeechFontSize,
-                lineHeight = SpeechLineHeight,
-                textAlign = TextAlign.Center
-            ).scaled(),
-            color = ChaduckColors.Primary.Normal
-        )
+        Crossfade(targetState = text, animationSpec = tween(CHARACTER_TRANSITION_MS), label = "speech") { text ->
+            SpeechText(text)
+        }
     }
 }
 
+@Composable
+private fun SpeechText(text: String) {
+    Text(
+        text = text,
+        modifier = Modifier.padding(top = SpeechTextTopPadding.scaled, bottom = SpeechTextBottomPadding.scaled),
+        style = MaterialTheme.typography.textBold.copy(
+            fontSize = SpeechFontSize,
+            lineHeight = SpeechLineHeight,
+            textAlign = TextAlign.Center
+        ).scaled(),
+        color = ChaduckColors.Primary.Normal
+    )
+}
+
 // 고른 캐릭터는 가운데에 크게, 이전·다음 캐릭터는 양옆에 작고 옅게 그린다. 세 캐릭터의 위쪽을 맞춘다.
+// 캐릭터를 바꾸면 세 캐릭터가 한 묶음으로 누른 방향으로 밀린다.
 @Composable
 private fun CharacterCarousel(uiState: HomeUiState) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(CarouselSpacing.scaled),
-        verticalAlignment = Alignment.Top
-    ) {
-        SideCharacter(uiState.previousCharacter)
-        SelectedCharacter(uiState.character, Modifier.size(SelectedCharacterSize.scaled))
-        SideCharacter(uiState.nextCharacter)
+    AnimatedContent(
+        targetState = uiState.character,
+        transitionSpec = { slideByDirection() },
+        label = "characterCarousel"
+    ) { character ->
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(CarouselSpacing.scaled),
+            verticalAlignment = Alignment.Top
+        ) {
+            SideCharacter(character.previous())
+            SelectedCharacter(character, Modifier.size(SelectedCharacterSize.scaled))
+            SideCharacter(character.next())
+        }
     }
+}
+
+// 다음(▶)을 누르면 왼쪽으로, 이전(◀)을 누르면 오른쪽으로 밀린다. 한 칸만큼(너비의 1/3) 밀며 흐려진다.
+private fun AnimatedContentTransitionScope<Character>.slideByDirection(): ContentTransform {
+    val direction = if (targetState == initialState.next()) 1 else -1
+    val spec = tween<IntOffset>(CHARACTER_TRANSITION_MS)
+    val fade = tween<Float>(CHARACTER_TRANSITION_MS)
+    return (slideInHorizontally(spec) { it / 3 * direction } + fadeIn(fade))
+        .togetherWith(slideOutHorizontally(spec) { -it / 3 * direction } + fadeOut(fade))
 }
 
 @Composable
@@ -397,18 +441,25 @@ private fun CharacterNameRow(character: Character, dimens: HomeDimens, onPreviou
             onPrevious
         )
         ImagePanel(R.drawable.img_panel_title, dimens.namePanelSize) {
-            Text(
-                text = stringResource(character.displayNameRes),
-                style = MaterialTheme.typography.textTitle.copy(
-                    fontSize = dimens.nameFontSize,
-                    lineHeight = dimens.nameFontSize,
-                    textAlign = TextAlign.Center
-                ).scaled(),
-                color = ChaduckColors.Primary.Normal
-            )
+            Crossfade(targetState = character, animationSpec = tween(CHARACTER_TRANSITION_MS), label = "name") {
+                CharacterName(it, dimens)
+            }
         }
         ImageButton(R.drawable.img_button_next, stringResource(R.string.home_next_character), ArrowButtonSize, onNext)
     }
+}
+
+@Composable
+private fun CharacterName(character: Character, dimens: HomeDimens) {
+    Text(
+        text = stringResource(character.displayNameRes),
+        style = MaterialTheme.typography.textTitle.copy(
+            fontSize = dimens.nameFontSize,
+            lineHeight = dimens.nameFontSize,
+            textAlign = TextAlign.Center
+        ).scaled(),
+        color = ChaduckColors.Primary.Normal
+    )
 }
 
 @Composable
@@ -428,7 +479,8 @@ private fun HomePreviewFrame(character: Character) {
     }
 }
 
-@PleosPortraitPreviews
+//@PleosPortraitPreviews
+@PleosLandscapePreviews
 @Composable
 private fun HomeContentPreview() {
     HomePreviewFrame(Character.entries.first())

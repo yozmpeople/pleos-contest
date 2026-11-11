@@ -29,6 +29,9 @@
     <string name="help_result_portrait">과속, 급가속, 급감속 등 항목에 따라\n안전 운전 점수가 감점됩니다.</string>
     <string name="help_leaderboard_portrait">운전이 종료되면 결과를 확인해 주세요.\n점수는 합산되어 주간 순위에 반영됩니다.</string>
 
+    <string name="leaderboard_title">%1$d월 %2$d주차 순위</string>
+    <string name="leaderboard_score">%1$d 점</string>
+
     <string name="character_water_cup_name">찰랑찰랑 물컵이</string>
     <string name="character_water_cup_speech">급하게 달리면 쏟아져!</string>
     <string name="character_tofu_name">뭉게뭉게 순두부</string>

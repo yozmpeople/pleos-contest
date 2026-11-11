@@ -14,6 +14,7 @@ import com.yozmpeople.dontspill.ui.component.CharacterBackground
 import com.yozmpeople.dontspill.ui.help.HelpScreen
 import com.yozmpeople.dontspill.ui.home.HomeScreen
 import com.yozmpeople.dontspill.ui.home.HomeTopButton
+import com.yozmpeople.dontspill.ui.leaderboard.LeaderboardScreen
 import com.yozmpeople.dontspill.ui.splash.SplashBackground
 import com.yozmpeople.dontspill.ui.splash.SplashContent
 import com.yozmpeople.dontspill.ui.theme.ChaduckTheme
@@ -22,7 +23,7 @@ import kotlinx.coroutines.delay
 private const val SPLASH_DURATION_MS = 2_000L
 
 // 스플래시 뒤에 보이는 화면
-private enum class AppScreen { Home, Help }
+private enum class AppScreen { Home, Help, Leaderboard }
 
 // 앱 화면의 루트. 배경은 스플래시만 고정 이미지이고, 나머지 화면은 고른 캐릭터 기준으로 그린다.
 // 화면이 더 늘면 Navigation 도입을 검토한다 (04 지시서 "미정")
@@ -53,15 +54,24 @@ fun DontSpillApp(characterRepository: CharacterRepository) {
                 SplashContent(contentPadding)
             } else {
                 when (screen) {
-                    // 도움말 말고 다른 상단 버튼의 화면은 아직 없다. 해당 화면을 만들 때 연결한다.
+                    // 업적·주행 기록 화면은 아직 없다. 해당 화면을 만들 때 연결한다.
                     AppScreen.Home -> HomeScreen(
                         contentPadding = contentPadding,
                         onTopButtonClick = { button ->
-                            if (button == HomeTopButton.Help) screen = AppScreen.Help
+                            when (button) {
+                                HomeTopButton.Help -> screen = AppScreen.Help
+                                HomeTopButton.Leaderboard -> screen = AppScreen.Leaderboard
+                                else -> Unit
+                            }
                         }
                     )
 
                     AppScreen.Help -> HelpScreen(
+                        contentPadding = contentPadding,
+                        onBack = { screen = AppScreen.Home }
+                    )
+
+                    AppScreen.Leaderboard -> LeaderboardScreen(
                         contentPadding = contentPadding,
                         onBack = { screen = AppScreen.Home }
                     )

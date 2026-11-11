@@ -1,6 +1,8 @@
 package com.yozmpeople.dontspill.di
 
+import android.os.SystemClock
 import com.yozmpeople.dontspill.common.ApplicationScope
+import com.yozmpeople.dontspill.common.ElapsedRealtimeClock
 import com.yozmpeople.dontspill.common.IoDispatcher
 import dagger.Module
 import dagger.Provides
@@ -24,4 +26,7 @@ object AppModule {
     @Singleton
     @ApplicationScope
     fun provideApplicationScope(): CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
+    @Provides
+    fun provideElapsedRealtimeClock(): ElapsedRealtimeClock = ElapsedRealtimeClock { SystemClock.elapsedRealtime() }
 }

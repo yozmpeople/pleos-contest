@@ -11,7 +11,6 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,6 +55,7 @@ import com.yozmpeople.dontspill.ui.component.ImagePanel
 import com.yozmpeople.dontspill.ui.component.InfoGuide
 import com.yozmpeople.dontspill.ui.component.WindowLayout
 import com.yozmpeople.dontspill.ui.component.currentWindowLayout
+import com.yozmpeople.dontspill.ui.component.pressScaleClickable
 import com.yozmpeople.dontspill.ui.component.scaled
 import com.yozmpeople.dontspill.ui.theme.ChaduckColors
 import com.yozmpeople.dontspill.ui.theme.ChaduckTheme
@@ -351,7 +351,7 @@ private fun TopButtons(dimens: HomeDimens, onClick: (HomeTopButton) -> Unit) {
             contentDescription = stringResource(button.descriptionRes),
             modifier = Modifier
                 .size(dimens.topButtonSize.scaled)
-                .clickable(onClick = { onClick(button) })
+                .pressScaleClickable { onClick(button) }
         )
     }
 }

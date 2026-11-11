@@ -1,11 +1,9 @@
 package com.yozmpeople.dontspill.ui.component
 
-import androidx.compose.foundation.clickable
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.TextUnit
@@ -19,7 +17,7 @@ fun PillButton(text: String, size: DpSize, fontSize: TextUnit, onClick: () -> Un
     ImagePanel(
         imageRes = R.drawable.img_panel_button,
         size = size,
-        modifier = modifier.clickable(role = Role.Button, onClick = onClick)
+        modifier = modifier.pressScaleClickable(onClick = onClick)
     ) {
         Text(
             text = text,

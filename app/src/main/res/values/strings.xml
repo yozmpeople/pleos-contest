@@ -35,6 +35,12 @@
     <string name="result_grade_perfect">PERFECT</string>
     <string name="result_grade_good">GOOD</string>
     <string name="result_grade_bad">BAD</string>
+    <string name="result_final_score">최종 점수</string>
+    <string name="result_score">%1$d점</string>
+    <string name="result_driving_time">주행 시간</string>
+    <string name="result_driving_distance">주행 거리</string>
+    <string name="result_home">홈으로 돌아가기</string>
+
     <string name="character_water_cup_name">찰랑찰랑 물컵이</string>
     <string name="character_water_cup_speech">급하게 달리면 쏟아져!</string>
     <string name="character_tofu_name">뭉게뭉게 순두부</string>

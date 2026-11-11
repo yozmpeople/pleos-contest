@@ -21,10 +21,10 @@ interface DrivingDao {
 
     // 최종 결과를 넣고 끝낸다. 이미 끝난 드라이빙이면 아무것도 바꾸지 않는다.
     @Query(
-        "UPDATE driving SET endedAtMs = :endedAtMs, score = :score, penaltyCounts = :penaltyCounts " +
-            "WHERE drivingId = :drivingId AND endedAtMs IS NULL"
+        "UPDATE driving SET endedAtMs = :endedAtMs, score = :score, penaltyCounts = :penaltyCounts, " +
+            "distanceMeters = :distanceMeters WHERE drivingId = :drivingId AND endedAtMs IS NULL"
     )
-    suspend fun finish(drivingId: String, endedAtMs: Long, score: Int, penaltyCounts: String)
+    suspend fun finish(drivingId: String, endedAtMs: Long, score: Int, penaltyCounts: String, distanceMeters: Double)
 
     // 끝났지만 아직 보여 주지 않은 결과. 최근에 끝난 것부터
     @Query(
@@ -33,6 +33,7 @@ interface DrivingDao {
     )
     fun observeUnshownResults(): Flow<List<DrivingEntity>>
 
-    @Query("UPDATE driving SET resultShown = 1 WHERE drivingId = :drivingId")
-    suspend fun markResultShown(drivingId: String)
+    // 가장 최근 결과만 보여 주고, 쌓인 결과는 모두 본 것으로 한다 (09 지시서)
+    @Query("UPDATE driving SET resultShown = 1 WHERE endedAtMs IS NOT NULL")
+    suspend fun markAllResultsShown()
 }

@@ -7,11 +7,14 @@ import com.yozmpeople.dontspill.common.debugLog
 import com.yozmpeople.dontspill.data.driving.local.DrivingDao
 import com.yozmpeople.dontspill.data.driving.local.DrivingEntity
 import com.yozmpeople.dontspill.data.driving.model.DrivingState
+import com.yozmpeople.dontspill.data.location.LocationRepository
 import com.yozmpeople.dontspill.data.vehicle.VehicleSignalRepository
 import com.yozmpeople.dontspill.data.vehicle.model.VehicleReading
+import com.yozmpeople.dontspill.domain.driving.DrivingDistanceAccumulator
 import com.yozmpeople.dontspill.domain.score.DrivingScoreCalculator
 import com.yozmpeople.dontspill.domain.score.DrivingScoreInput
 import com.yozmpeople.dontspill.domain.score.DrivingScoreResult
+import com.yozmpeople.dontspill.ui.character.CharacterRepository
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -36,6 +39,8 @@ private const val TAG = "DrivingRecorder"
 class DrivingRecorder @Inject constructor(
     private val drivingDetector: DrivingDetector,
     private val vehicleSignalRepository: VehicleSignalRepository,
+    private val locationRepository: LocationRepository,
+    private val characterRepository: CharacterRepository,
     private val drivingDao: DrivingDao,
     private val clock: ElapsedRealtimeClock,
     private val wallClock: WallClock,
@@ -55,6 +60,11 @@ class DrivingRecorder @Inject constructor(
         }
     }
 
+    // 사용자가 주행 중 화면에서 종료를 누를 때. 주행 상태가 대기로 바뀌면 진행 중인 기록이 끝난다.
+    fun endDriving() {
+        drivingDetector.endDriving()
+    }
+
     // 주행 중이면 지금 시각으로 드라이빙을 끝낸다.
     fun stop() {
         job?.cancel()
@@ -65,6 +75,7 @@ class DrivingRecorder @Inject constructor(
     private suspend fun record(driving: DrivingState.Driving) {
         val drivingId = UUID.randomUUID().toString()
         val calculator = DrivingScoreCalculator(driving.startedAtMs, vehicleSignalRepository.readWheelbaseM())
+        val distance = DrivingDistanceAccumulator()
         try {
             val initial = calculator.result()
             drivingDao.insert(
@@ -73,12 +84,14 @@ class DrivingRecorder @Inject constructor(
                     startedAtMs = toEpochMs(driving.startedAtMs),
                     endedAtMs = null,
                     score = initial.score,
+                    character = characterRepository.selected.value.name,
+                    distanceMeters = 0.0,
                     penaltyCounts = encodeCounts(initial),
                     resultShown = false
                 )
             )
             debugLog(TAG) { "드라이빙 시작" }
-            collectInputs(driving.startedAtMs, calculator, initial) { result ->
+            collectInputs(driving.startedAtMs, calculator, distance, initial) { result ->
                 drivingDao.updateScore(drivingId, result.score, encodeCounts(result))
             }
         } finally {
@@ -86,7 +99,13 @@ class DrivingRecorder @Inject constructor(
             val endedAtMs = clock.nowMs()
             val result = calculator.finish(endedAtMs)
             withContext(NonCancellable) {
-                drivingDao.finish(drivingId, toEpochMs(endedAtMs), result.score, encodeCounts(result))
+                drivingDao.finish(
+                    drivingId = drivingId,
+                    endedAtMs = toEpochMs(endedAtMs),
+                    score = result.score,
+                    penaltyCounts = encodeCounts(result),
+                    distanceMeters = distance.totalMeters
+                )
             }
             debugLog(TAG) { "드라이빙 종료: 점수 ${result.score}" }
         }
@@ -97,6 +116,7 @@ class DrivingRecorder @Inject constructor(
     private suspend fun collectInputs(
         startedAtMs: Long,
         calculator: DrivingScoreCalculator,
+        distance: DrivingDistanceAccumulator,
         initial: DrivingScoreResult,
         onCountsChanged: suspend (DrivingScoreResult) -> Unit
     ): Unit = coroutineScope {
@@ -105,6 +125,10 @@ class DrivingRecorder @Inject constructor(
         val highBeamOn = vehicleSignalRepository.highBeamOn.latestIn(this)
         val wipersOn = vehicleSignalRepository.frontWipersOn.latestIn(this)
         val frontWheelAngleDeg = vehicleSignalRepository.frontWheelAngleDeg.latestIn(this)
+        // 위치 점이 올 때마다 거리를 더한다. 좌표는 로그에 남기지 않는다.
+        launch {
+            locationRepository.location.collect { distance.add(it.latitudeDeg, it.longitudeDeg) }
+        }
 
         var lastTimestampMs = startedAtMs
         var savedCounts = initial.counts

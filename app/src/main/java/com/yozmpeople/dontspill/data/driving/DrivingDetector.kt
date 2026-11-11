@@ -57,6 +57,11 @@ class DrivingDetector @Inject constructor(
         }
     }
 
+    // 사용자가 주행 중 화면에서 종료를 누를 때. 신호가 그대로면 다시 바뀔 때까지 대기로 둔다.
+    fun endDriving() {
+        moveTo(DrivingState.Idle)
+    }
+
     fun stop() {
         job?.cancel()
         job = null

@@ -125,6 +125,29 @@ class DrivingDetectorTest {
         assertEquals(DrivingState.Driving(startedAtMs = 0), detector.state.value)
     }
 
+    @Test
+    fun `종료를 누르면 주행이 끝나고 신호가 그대로면 다시 시작하지 않는다`() = runTest {
+        val detector = startDriving()
+
+        detector.endDriving()
+        waitMs(10_000)
+
+        assertEquals(DrivingState.Idle, detector.state.value)
+    }
+
+    @Test
+    fun `종료 뒤 멈췄다 다시 움직이면 새 주행이 시작된다`() = runTest {
+        val detector = startDriving()
+
+        detector.endDriving()
+        vehicle.stop()
+        waitMs(1_000)
+        vehicle.move()
+        waitMs(5_000)
+
+        assertEquals(DrivingState.Driving(startedAtMs = 6_000), detector.state.value)
+    }
+
     // 0ms에 움직이기 시작해 5,000ms에 주행이 된 상태
     private fun TestScope.startDriving(): DrivingDetector {
         val detector = startDetector()

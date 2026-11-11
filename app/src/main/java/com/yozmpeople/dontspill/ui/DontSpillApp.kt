@@ -12,13 +12,14 @@ import com.yozmpeople.dontspill.ui.character.CharacterRepository
 import com.yozmpeople.dontspill.ui.component.AppContentFrame
 import com.yozmpeople.dontspill.ui.component.CharacterBackground
 import com.yozmpeople.dontspill.ui.home.HomeScreen
+import com.yozmpeople.dontspill.ui.splash.SplashBackground
 import com.yozmpeople.dontspill.ui.splash.SplashContent
 import com.yozmpeople.dontspill.ui.theme.ChaduckTheme
 import kotlinx.coroutines.delay
 
 private const val SPLASH_DURATION_MS = 2_000L
 
-// 앱 화면의 루트. 배경은 고른 캐릭터 기준으로 모든 화면에 같이 그린다.
+// 앱 화면의 루트. 배경은 스플래시만 고정 이미지이고, 나머지 화면은 고른 캐릭터 기준으로 그린다.
 // 화면이 더 늘면 Navigation 도입을 검토한다 (04 지시서 "미정")
 @Composable
 fun DontSpillApp(characterRepository: CharacterRepository) {
@@ -34,7 +35,13 @@ fun DontSpillApp(characterRepository: CharacterRepository) {
 
     ChaduckTheme {
         AppContentFrame(
-            background = { CharacterBackground(character, Modifier.matchParentSize()) }
+            background = {
+                if (showSplash) {
+                    SplashBackground(Modifier.matchParentSize())
+                } else {
+                    CharacterBackground(character, Modifier.matchParentSize())
+                }
+            }
         ) { contentPadding ->
             if (showSplash) {
                 SplashContent(contentPadding)

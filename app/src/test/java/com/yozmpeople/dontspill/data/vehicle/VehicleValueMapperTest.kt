@@ -3,9 +3,7 @@ package com.yozmpeople.dontspill.data.vehicle
 import ai.pleos.playground.vehicle.constant.control.LightState
 import ai.pleos.playground.vehicle.constant.control.WiperState
 import android.car.VehicleGear
-import android.car.VehicleIgnitionState
 import com.yozmpeople.dontspill.data.vehicle.model.Gear
-import com.yozmpeople.dontspill.data.vehicle.model.IgnitionState
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -26,16 +24,6 @@ class VehicleValueMapperTest {
     fun `모르는 기어 값은 UNKNOWN이다`() {
         assertEquals(Gear.UNKNOWN, VehicleValueMapper.gear(VehicleGear.GEAR_UNKNOWN))
         assertEquals(Gear.UNKNOWN, VehicleValueMapper.gear(3))
-    }
-
-    @Test
-    fun `시동 상태는 AAOS 단계를 그대로 옮기고 모르는 값은 UNKNOWN이다`() {
-        assertEquals(IgnitionState.LOCK, VehicleValueMapper.ignition(VehicleIgnitionState.LOCK))
-        assertEquals(IgnitionState.OFF, VehicleValueMapper.ignition(VehicleIgnitionState.OFF))
-        assertEquals(IgnitionState.ACC, VehicleValueMapper.ignition(VehicleIgnitionState.ACC))
-        assertEquals(IgnitionState.ON, VehicleValueMapper.ignition(VehicleIgnitionState.ON))
-        assertEquals(IgnitionState.START, VehicleValueMapper.ignition(VehicleIgnitionState.START))
-        assertEquals(IgnitionState.UNKNOWN, VehicleValueMapper.ignition(VehicleIgnitionState.UNDEFINED))
     }
 
     @Test

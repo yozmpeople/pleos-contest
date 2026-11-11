@@ -95,7 +95,7 @@ class DrivingRecorder @Inject constructor(
                 drivingDao.updateScore(drivingId, result.score, encodeCounts(result))
             }
         } finally {
-            // 대기로 바뀐 시각(P 진입, 시동 OFF)을 종료 시각으로 쓴다.
+            // 대기로 바뀐 시각(P 진입, 사용자 종료)을 종료 시각으로 쓴다.
             val endedAtMs = clock.nowMs()
             val result = calculator.finish(endedAtMs)
             withContext(NonCancellable) {

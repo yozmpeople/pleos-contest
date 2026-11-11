@@ -6,7 +6,6 @@ import com.yozmpeople.dontspill.common.debugLog
 import com.yozmpeople.dontspill.data.driving.model.DrivingState
 import com.yozmpeople.dontspill.data.vehicle.VehicleSignalRepository
 import com.yozmpeople.dontspill.data.vehicle.model.Gear
-import com.yozmpeople.dontspill.data.vehicle.model.IgnitionState
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.abs
@@ -29,7 +28,8 @@ private val DRIVING_CONFIRM_DURATION = 5.seconds
 
 private const val TAG = "DrivingDetector"
 
-// 기어·차속·시동으로 주행 시작과 종료를 판단한다.
+// 기어·차속으로 주행 시작과 종료를 판단한다. 종료는 P 진입이나 사용자 종료뿐이다.
+// 시동은 보지 않는다. 시동을 끄기 전에 P에 넣고, v2.1.0 에뮬레이터는 시동 값을 보내지 않는다 (사용자, 2026-11-12)
 @Singleton
 class DrivingDetector @Inject constructor(
     private val vehicleSignalRepository: VehicleSignalRepository,
@@ -45,11 +45,10 @@ class DrivingDetector @Inject constructor(
     fun start() {
         if (job?.isActive == true) return
         job = scope.launch {
-            // 기어·시동은 값이 안 올 수 있어서 UNKNOWN으로 시작한다. 시동은 v2.1.0 에뮬레이터에서 오지 않는다.
+            // 기어는 값이 안 올 수 있어서 UNKNOWN으로 시작한다.
             combine(
                 vehicleSignalRepository.gear.map { it.value }.onStart { emit(Gear.UNKNOWN) },
                 vehicleSignalRepository.speedMps.map { it.value },
-                vehicleSignalRepository.ignition.map { it.value }.onStart { emit(IgnitionState.UNKNOWN) },
                 ::toSignal
             )
                 .distinctUntilChanged()
@@ -71,7 +70,7 @@ class DrivingDetector @Inject constructor(
     // collectLatest라서 신호가 바뀌면 진행 중인 delay가 취소된다.
     private suspend fun onSignal(signal: Signal) {
         when (signal) {
-            Signal.IGNITION_OFF, Signal.PARKED -> moveTo(DrivingState.Idle)
+            Signal.PARKED -> moveTo(DrivingState.Idle)
 
             // 움직임이 5초 이어져야 주행으로 본다.
             Signal.MOVING -> {
@@ -95,18 +94,15 @@ class DrivingDetector @Inject constructor(
 }
 
 private enum class Signal {
-    IGNITION_OFF,
     PARKED,
     MOVING,
     STILL
 }
 
-// - 시동은 OFF·LOCK만 꺼짐으로 본다. UNKNOWN(값 없음)과 ACC는 꺼짐이 아니다.
 // - 주행은 Pleos Driving 정의(기어 P 아님 + 속도 > 0)를 따른다. 기어 UNKNOWN도 P 아님이다.
-//   그래서 기어 값이 오지 않으면 P 진입으로 끝나지 않고, 시동 OFF로만 끝난다.
+//   그래서 기어 값이 오지 않으면 P 진입으로 끝나지 않고, 주행 중 화면의 종료로만 끝난다.
 // - 차속은 절댓값으로 본다. 후진이면 음수다.
-private fun toSignal(gear: Gear, speedMps: Double, ignition: IgnitionState): Signal = when {
-    ignition == IgnitionState.OFF || ignition == IgnitionState.LOCK -> Signal.IGNITION_OFF
+private fun toSignal(gear: Gear, speedMps: Double): Signal = when {
     gear == Gear.PARK -> Signal.PARKED
     abs(speedMps) > 0.0 -> Signal.MOVING
     else -> Signal.STILL

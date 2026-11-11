@@ -3,7 +3,6 @@ package com.yozmpeople.dontspill.data.vehicle
 import com.yozmpeople.dontspill.common.ApplicationScope
 import com.yozmpeople.dontspill.data.vehicle.aaos.CarPropertySource
 import com.yozmpeople.dontspill.data.vehicle.model.Gear
-import com.yozmpeople.dontspill.data.vehicle.model.IgnitionState
 import com.yozmpeople.dontspill.data.vehicle.model.VehicleReading
 import com.yozmpeople.dontspill.data.vehicle.pleos.NaviSpeedLimitSource
 import com.yozmpeople.dontspill.data.vehicle.pleos.PleosVehicleSource
@@ -23,7 +22,6 @@ interface VehicleSignalRepository {
     // 부호 있는 차속(m/s). 후진이면 음수
     val speedMps: Flow<VehicleReading<Double>>
     val gear: Flow<VehicleReading<Gear>>
-    val ignition: Flow<VehicleReading<IgnitionState>>
     val lowBeamOn: Flow<VehicleReading<Boolean?>>
     val highBeamOn: Flow<VehicleReading<Boolean?>>
     val frontWipersOn: Flow<VehicleReading<Boolean?>>
@@ -47,7 +45,6 @@ class DefaultVehicleSignalRepository @Inject constructor(
 
     override val speedMps = carPropertySource.observeSpeed().mapValue(VehicleValueMapper::speedMps)
     override val gear = carPropertySource.observeGear().mapValue(VehicleValueMapper::gear)
-    override val ignition = carPropertySource.observeIgnition().mapValue(VehicleValueMapper::ignition)
     override val lowBeamOn = pleosVehicleSource.observeLowBeam().mapValue(VehicleValueMapper::lightOn)
     override val highBeamOn = pleosVehicleSource.observeHighBeam().mapValue(VehicleValueMapper::lightOn)
     override val frontWipersOn = pleosVehicleSource.observeFrontWiper().mapValue(VehicleValueMapper::wiperOn)

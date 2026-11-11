@@ -84,7 +84,6 @@ class MainActivity : ComponentActivity() {
                 merge(
                     repository.speedMps.map { "speedMps $it" },
                     repository.gear.map { "gear $it" },
-                    repository.ignition.map { "ignition $it" },
                     repository.lowBeamOn.map { "lowBeamOn $it" },
                     repository.highBeamOn.map { "highBeamOn $it" },
                     repository.frontWipersOn.map { "frontWipersOn $it" },

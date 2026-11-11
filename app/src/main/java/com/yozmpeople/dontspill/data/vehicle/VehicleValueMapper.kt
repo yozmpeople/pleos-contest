@@ -3,9 +3,7 @@ package com.yozmpeople.dontspill.data.vehicle
 import ai.pleos.playground.vehicle.constant.control.LightState
 import ai.pleos.playground.vehicle.constant.control.WiperState
 import android.car.VehicleGear
-import android.car.VehicleIgnitionState
 import com.yozmpeople.dontspill.data.vehicle.model.Gear
-import com.yozmpeople.dontspill.data.vehicle.model.IgnitionState
 
 // INFO_EXTERIOR_DIMENSIONS 배열에서 축거 위치
 private const val WHEELBASE_INDEX = 4
@@ -31,15 +29,6 @@ object VehicleValueMapper {
         VehicleGear.GEAR_EIGHTH,
         VehicleGear.GEAR_NINTH -> Gear.DRIVE
         else -> Gear.UNKNOWN
-    }
-
-    fun ignition(value: Int): IgnitionState = when (value) {
-        VehicleIgnitionState.LOCK -> IgnitionState.LOCK
-        VehicleIgnitionState.OFF -> IgnitionState.OFF
-        VehicleIgnitionState.ACC -> IgnitionState.ACC
-        VehicleIgnitionState.ON -> IgnitionState.ON
-        VehicleIgnitionState.START -> IgnitionState.START
-        else -> IgnitionState.UNKNOWN
     }
 
     // ON만 켜짐, OFF만 꺼짐. 주간주행등(지원 안 함)과 null은 모름

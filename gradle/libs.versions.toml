@@ -20,8 +20,8 @@ coroutines = "1.11.0"
 serialization = "1.12.0"
 ktor = "3.6.0"
 pleosVehicle = "2.3.2"
-pleosTextToSpeech = "3.3.1"
 pleosFusedLocation = "1.1.3"
+pleosNaviHelper = "3.0.5"
 zxing = "3.5.4"
 
 [libraries]
@@ -66,8 +66,8 @@ zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing" 
 
 # Pleos
 pleos-vehicle = { group = "ai.pleos.playground", name = "Vehicle", version.ref = "pleosVehicle" }
-pleos-text-to-speech = { group = "ai.pleos.playground", name = "TextToSpeech", version.ref = "pleosTextToSpeech" }
 pleos-fused-location = { group = "ai.pleos.playground", name = "FusedLocation", version.ref = "pleosFusedLocation" }
+pleos-navi-helper = { group = "ai.pleos.playground", name = "NaviHelper", version.ref = "pleosNaviHelper" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

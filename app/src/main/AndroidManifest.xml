@@ -18,6 +18,17 @@
     <!-- 전륜각 -->
     <uses-permission android:name="pleos.car.permission.CAR_DRIVE" />
 
+    <!-- Pleos FusedLocation SDK 위치 (dangerous, 런타임 요청) -->
+    <uses-permission android:name="pleos.car.permission.FUSED_LOCATION" />
+
+    <!-- Android 위치. location 타입 포그라운드 서비스를 띄울 때 필요하다. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <!-- 주행 기록 포그라운드 서비스 -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+
     <application
         android:name=".DontSpillApplication"
         android:allowBackup="true"
@@ -37,6 +48,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".service.DrivingMonitorService"
+            android:exported="false"
+            android:foregroundServiceType="location" />
     </application>
 
 </manifest>

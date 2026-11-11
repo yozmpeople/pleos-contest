@@ -1,0 +1,60 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "8c6c9ae560f4ce931a554d618abb39fa",
+    "entities": [
+      {
+        "tableName": "driving",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`drivingId` TEXT NOT NULL, `startedAtMs` INTEGER NOT NULL, `endedAtMs` INTEGER, `score` INTEGER NOT NULL, `penaltyCounts` TEXT NOT NULL, `resultShown` INTEGER NOT NULL, PRIMARY KEY(`drivingId`))",
+        "fields": [
+          {
+            "fieldPath": "drivingId",
+            "columnName": "drivingId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startedAtMs",
+            "columnName": "startedAtMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endedAtMs",
+            "columnName": "endedAtMs",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "score",
+            "columnName": "score",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "penaltyCounts",
+            "columnName": "penaltyCounts",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "resultShown",
+            "columnName": "resultShown",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "drivingId"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8c6c9ae560f4ce931a554d618abb39fa')"
+    ]
+  }
+}

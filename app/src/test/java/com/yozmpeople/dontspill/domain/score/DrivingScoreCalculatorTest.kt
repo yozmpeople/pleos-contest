@@ -64,8 +64,8 @@ class DrivingScoreCalculatorTest {
     }
 
     @Test
-    fun `강수량 10mm에서 와이퍼를 쓰지 않으면 첫 발생 즉시 90점`() {
-        val result = calculator.update(input(0.0, rainfallMm = 10.0, wipersOn = false))
+    fun `강수량 5mm에서 와이퍼를 쓰지 않으면 첫 발생 즉시 90점`() {
+        val result = calculator.update(input(0.0, rainfallMm = 5.0, wipersOn = false))
 
         assertOccurred(result, PenaltyFactor.WIPERS_OFF_IN_HEAVY_RAIN, count = 1, score = 90)
     }
@@ -212,8 +212,8 @@ class DrivingScoreCalculatorTest {
 
     @Test
     fun `반환한 결과는 이후 update로 바뀌지 않는다`() {
-        val before = calculator.update(input(0.0, rainfallMm = 5.0, wipersOn = false))
-        calculator.update(input(1.0, rainfallMm = 10.0, wipersOn = false))
+        val before = calculator.update(input(0.0, rainfallMm = 4.9, wipersOn = false))
+        calculator.update(input(1.0, rainfallMm = 5.0, wipersOn = false))
 
         assertEquals(100, before.score)
         assertEquals(0, before.counts.getValue(PenaltyFactor.WIPERS_OFF_IN_HEAVY_RAIN))

@@ -138,11 +138,10 @@ private val NameRowMinSpacing = 1.dp
 // 점수 패널 오른쪽은 트로피 자리라 글자는 왼쪽부터 놓는다. 위아래는 가운데다(가로 31, 세로 30). (사용자, 2026-11-11)
 private val ScoreTextSpacing = 16.dp
 
-// 말풍선 이미지 아래쪽은 꼬리라 글자를 위로 올린다. 위 30, 아래 50 (사용자, 2026-11-11)
+// 말풍선 이미지 아래쪽은 꼬리라 글자 세로 위치는 위 여백으로 정한다. 가로는 가운데다 (사용자, 2026-11-12)
 // 이미지 높이(114dp)의 가운데에 두면 꼬리 때문에 몸통보다 아래로 처진다 (사용자, 2026-11-12)
-// 몸통은 이미지 위 약 5dp~91dp라 몸통 가운데(약 48dp)와 이 여백의 글자 가운데(47dp)가 거의 같다
+// 몸통은 이미지 위 약 5dp~91dp라 몸통 가운데(약 48dp)와 글자 가운데(30 + 32 / 2 = 46dp)가 거의 같다
 private val SpeechTextTopPadding = 30.dp
-private val SpeechTextBottomPadding = 50.dp
 
 // 시안 수치 (사용자, 2026-11-11)
 private val SpeechFontSize = 32.sp
@@ -359,7 +358,13 @@ private fun TopButtons(dimens: HomeDimens, onClick: (HomeTopButton) -> Unit) {
 @Composable
 private fun SpeechBubble(text: String, modifier: Modifier = Modifier) {
     ImagePanel(R.drawable.img_panel_speechbubble, SpeechBubbleSize, modifier) {
-        Crossfade(targetState = text, animationSpec = tween(CHARACTER_TRANSITION_MS), label = "speech") { text ->
+        // 바뀌는 동안 길이가 다른 두 문구가 겹쳐도 치우치지 않게 말풍선 전체를 채우고 가로 가운데에 놓는다.
+        Crossfade(
+            targetState = text,
+            modifier = Modifier.fillMaxSize(),
+            animationSpec = tween(CHARACTER_TRANSITION_MS),
+            label = "speech"
+        ) { text ->
             SpeechText(text)
         }
     }
@@ -369,7 +374,9 @@ private fun SpeechBubble(text: String, modifier: Modifier = Modifier) {
 private fun SpeechText(text: String) {
     Text(
         text = text,
-        modifier = Modifier.padding(top = SpeechTextTopPadding.scaled, bottom = SpeechTextBottomPadding.scaled),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = SpeechTextTopPadding.scaled),
         style = MaterialTheme.typography.textBold.copy(
             fontSize = SpeechFontSize,
             lineHeight = SpeechLineHeight,
@@ -441,8 +448,16 @@ private fun CharacterNameRow(character: Character, dimens: HomeDimens, onPreviou
             onPrevious
         )
         ImagePanel(R.drawable.img_panel_title, dimens.namePanelSize) {
-            Crossfade(targetState = character, animationSpec = tween(CHARACTER_TRANSITION_MS), label = "name") {
-                CharacterName(it, dimens)
+            // 말풍선과 같은 이유로 이름표 전체를 채우고 가운데에 놓는다.
+            Crossfade(
+                targetState = character,
+                modifier = Modifier.fillMaxSize(),
+                animationSpec = tween(CHARACTER_TRANSITION_MS),
+                label = "name"
+            ) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CharacterName(it, dimens)
+                }
             }
         }
         ImageButton(R.drawable.img_button_next, stringResource(R.string.home_next_character), ArrowButtonSize, onNext)

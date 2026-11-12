@@ -9,6 +9,6 @@ class BootReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != Intent.ACTION_BOOT_COMPLETED) return
-        DrivingMonitorService.startFromBackground(context)
+        DrivingMonitorService.start(context)
     }
 }

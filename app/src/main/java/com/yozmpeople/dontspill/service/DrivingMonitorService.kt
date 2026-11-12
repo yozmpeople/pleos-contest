@@ -1,6 +1,5 @@
 package com.yozmpeople.dontspill.service
 
-import android.Manifest
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -23,7 +22,10 @@ private const val TAG = "DrivingMonitorService"
 private const val NOTIFICATION_ID = 1
 private const val CHANNEL_ID = "driving_monitor"
 
-// 주행 감지와 드라이빙 기록을 돌리는 location 타입 포그라운드 서비스. 시작·정지만 하고 기록은 DrivingRecorder가 한다.
+// FusedLocation SDK의 PleosPermission은 runtime 의존성(fused-location-data)에 있어 컴파일 때 쓸 수 없다.
+internal const val FUSED_LOCATION_PERMISSION = "pleos.car.permission.FUSED_LOCATION"
+
+// 주행 감지와 드라이빙 기록을 돌리는 포그라운드 서비스. 시작·정지만 하고 기록은 DrivingRecorder가 한다.
 // 포그라운드 서비스가 있으면 주행 중 시스템이 Activity를 닫아도 프로세스와 기록이 이어진다
 @AndroidEntryPoint
 class DrivingMonitorService : Service() {
@@ -40,10 +42,10 @@ class DrivingMonitorService : Service() {
                 this,
                 NOTIFICATION_ID,
                 buildNotification(),
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
             )
         } catch (e: SecurityException) {
-            // 위치 권한이 없거나, 화면 없이 다시 시작돼 "앱 사용 중에만 허용" 권한으로는 띄울 수 없을 때
+            // 시스템이 포그라운드 서비스 시작을 막았을 때
             debugLog(TAG) { "포그라운드 시작 실패: $e" }
             stopSelf()
             return START_NOT_STICKY
@@ -74,24 +76,10 @@ class DrivingMonitorService : Service() {
     }
 
     companion object {
-        // 화면이 떠 있을 때 부른다. 위치 권한은 "앱 사용 중에만 허용"이어도 된다
-        fun startFromForeground(context: Context) {
-            startIfGranted(context, Manifest.permission.ACCESS_FINE_LOCATION)
-        }
-
-        // 부팅 뒤 화면 없이 부른다. 화면 없이 위치 서비스를 띄우려면 "항상 허용"이 있어야 한다.
-        fun startFromBackground(context: Context) {
-            startIfGranted(
-                context,
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION
-            )
-        }
-
-        private fun startIfGranted(context: Context, vararg permissions: String) {
-            val granted = permissions.all {
-                ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
-            }
+        // 앱 화면과 부팅 수신기에서 부른다. 위치는 Pleos FusedLocation으로만 받아서 Android 위치 권한은 쓰지 않는다.
+        fun start(context: Context) {
+            val granted = ContextCompat.checkSelfPermission(context, FUSED_LOCATION_PERMISSION) ==
+                PackageManager.PERMISSION_GRANTED
             if (!granted) {
                 debugLog(TAG) { "위치 권한이 없어 서비스를 시작하지 않음" }
                 return

@@ -21,18 +21,12 @@
     <!-- Pleos FusedLocation SDK 위치 (dangerous, 런타임 요청) -->
     <uses-permission android:name="pleos.car.permission.FUSED_LOCATION" />
 
-    <!-- Android 위치. location 타입 포그라운드 서비스를 띄울 때 필요하다. -->
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <!-- 부팅 뒤 화면 없이 주행 기록 서비스를 띄울 때 필요하다. -->
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
-
     <!-- 부팅되면 주행 기록 서비스를 시작한다. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <!-- 주행 기록 포그라운드 서비스 -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <application
         android:name=".DontSpillApplication"
@@ -57,7 +51,12 @@
         <service
             android:name=".service.DrivingMonitorService"
             android:exported="false"
-            android:foregroundServiceType="location" />
+            android:foregroundServiceType="specialUse">
+            <!-- 위치는 Android 위치 권한이 아닌 Pleos FusedLocation으로 받아서 location 타입을 쓸 수 없다. -->
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Detects driving from vehicle gear and speed, and records the driving score and distance while driving." />
+        </service>
 
         <receiver
             android:name=".service.BootReceiver"

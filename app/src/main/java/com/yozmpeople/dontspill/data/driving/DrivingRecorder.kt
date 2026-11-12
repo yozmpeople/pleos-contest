@@ -18,6 +18,7 @@ import com.yozmpeople.dontspill.ui.character.CharacterRepository
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
@@ -33,6 +34,9 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 
 private const val TAG = "DrivingRecorder"
+
+// 감점이 없어도 이 간격마다 점수와 거리를 저장한다. 앱이 주행 중에 꺼져도 잃는 기록을 줄인다.
+private val PROGRESS_SAVE_INTERVAL_MS = 10.seconds.inWholeMilliseconds
 
 // 주행 상태에 따라 드라이빙을 시작·종료하고, 주행 중 점수를 계산해 Room에 저장한다.
 @Singleton
@@ -92,7 +96,7 @@ class DrivingRecorder @Inject constructor(
             )
             debugLog(TAG) { "드라이빙 시작" }
             collectInputs(driving.startedAtMs, calculator, distance, initial) { result ->
-                drivingDao.updateScore(drivingId, result.score, encodeCounts(result))
+                drivingDao.updateProgress(drivingId, result.score, encodeCounts(result), distance.totalMeters)
             }
         } finally {
             // 대기로 바뀐 시각(P 진입, 사용자 종료)을 종료 시각으로 쓴다.
@@ -112,13 +116,13 @@ class DrivingRecorder @Inject constructor(
     }
 
     // 차속 이벤트마다 나머지 신호의 최신 값으로 입력 1건을 넣는다
-    // 점수와 횟수는 감점이 확정될 때만 바뀌므로, 횟수가 바뀌었을 때만 저장한다.
+    // 감점 횟수가 바뀌었거나 저장한 지 PROGRESS_SAVE_INTERVAL_MS가 지나면 저장한다.
     private suspend fun collectInputs(
         startedAtMs: Long,
         calculator: DrivingScoreCalculator,
         distance: DrivingDistanceAccumulator,
         initial: DrivingScoreResult,
-        onCountsChanged: suspend (DrivingScoreResult) -> Unit
+        onProgress: suspend (DrivingScoreResult) -> Unit
     ): Unit = coroutineScope {
         val speedLimitKmh = vehicleSignalRepository.speedLimitKmh.latestIn(this)
         val lowBeamOn = vehicleSignalRepository.lowBeamOn.latestIn(this)
@@ -132,6 +136,7 @@ class DrivingRecorder @Inject constructor(
 
         var lastTimestampMs = startedAtMs
         var savedCounts = initial.counts
+        var savedAtMs = startedAtMs
         vehicleSignalRepository.speedMps.collect { speed ->
             // 계산기는 시간순 입력을 전제로 한다. 시작 전 값(replay)과 순서가 뒤바뀐 값은 넣지 않는다.
             if (speed.timestampMs <= lastTimestampMs) return@collect
@@ -149,9 +154,10 @@ class DrivingRecorder @Inject constructor(
                     frontWheelAngleDeg = frontWheelAngleDeg.value
                 )
             )
-            if (result.counts != savedCounts) {
+            if (result.counts != savedCounts || speed.timestampMs - savedAtMs >= PROGRESS_SAVE_INTERVAL_MS) {
                 savedCounts = result.counts
-                onCountsChanged(result)
+                savedAtMs = speed.timestampMs
+                onProgress(result)
             }
         }
     }

@@ -12,12 +12,12 @@ interface DrivingDao {
     @Insert
     suspend fun insert(driving: DrivingEntity)
 
-    // 주행 중 점수를 저장한다. 끝난 드라이빙은 바꾸지 않는다.
+    // 주행 중 점수와 거리를 저장한다. 끝난 드라이빙은 바꾸지 않는다.
     @Query(
-        "UPDATE driving SET score = :score, penaltyCounts = :penaltyCounts " +
+        "UPDATE driving SET score = :score, penaltyCounts = :penaltyCounts, distanceMeters = :distanceMeters " +
             "WHERE drivingId = :drivingId AND endedAtMs IS NULL"
     )
-    suspend fun updateScore(drivingId: String, score: Int, penaltyCounts: String)
+    suspend fun updateProgress(drivingId: String, score: Int, penaltyCounts: String, distanceMeters: Double)
 
     // 최종 결과를 넣고 끝낸다. 이미 끝난 드라이빙이면 아무것도 바꾸지 않는다.
     @Query(

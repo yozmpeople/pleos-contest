@@ -1,0 +1,52 @@
+<resources>
+    <string name="app_name">살살운전대작전</string>
+    <string name="back">뒤로 가기</string>
+    <string name="driving_notification_channel">주행 기록</string>
+    <string name="driving_notification_title">주행을 기록하고 있어요</string>
+
+    <string name="splash_title">쏟지마! 물컵!</string>
+
+    <string name="home_score_label">SCORE</string>
+    <string name="home_achievement">업적</string>
+    <string name="home_help">도움말</string>
+    <string name="home_leaderboard">리더보드</string>
+    <string name="home_history">주행 기록</string>
+    <string name="home_previous_character">이전 캐릭터</string>
+    <string name="home_next_character">다음 캐릭터</string>
+    <string name="home_guide">주행을 시작하면 게임이 자동으로 시작되고, 앱이 백그라운드로 전환돼요</string>
+
+    <string name="driving_end">주행 종료하기</string>
+    <string name="driving_guide">자동으로 주행이 종료되지 않는 경우, 버튼을 눌러 주행을 종료해 주세요</string>
+
+    <string name="help_title">도움말</string>
+    <string name="help_previous">이전 페이지</string>
+    <string name="help_next">다음 페이지</string>
+    <string name="help_page_number">%1$d/%2$d</string>
+    <string name="help_skin">원하는 스킨을 선택하고 주행을 시작해 주세요.</string>
+    <string name="help_result">과속, 급가속, 급감속 등 항목에 따라 안전 운전 점수가 감점됩니다.</string>
+    <string name="help_leaderboard">운전이 종료되면 결과를 확인해 주세요. 점수는 합산되어 주간 순위에 반영됩니다.</string>
+    <string name="help_skin_portrait">원하는 스킨을 선택하고\n주행을 시작해 주세요.</string>
+    <string name="help_result_portrait">과속, 급가속, 급감속 등 항목에 따라\n안전 운전 점수가 감점됩니다.</string>
+    <string name="help_leaderboard_portrait">운전이 종료되면 결과를 확인해 주세요.\n점수는 합산되어 주간 순위에 반영됩니다.</string>
+
+    <string name="leaderboard_title">%1$d월 %2$d주차 순위</string>
+    <string name="leaderboard_score">%1$d 점</string>
+
+    <string name="result_grade_perfect">PERFECT</string>
+    <string name="result_grade_good">GOOD</string>
+    <string name="result_grade_bad">BAD</string>
+    <string name="result_final_score">최종 점수</string>
+    <string name="result_score">%1$d점</string>
+    <string name="result_driving_time">주행 시간</string>
+    <string name="result_driving_distance">주행 거리</string>
+    <string name="result_home">홈으로 돌아가기</string>
+
+    <string name="character_water_cup_name">찰랑찰랑 물컵이</string>
+    <string name="character_water_cup_speech">급하게 달리면 쏟아져!</string>
+    <string name="character_tofu_name">뭉게뭉게 순두부</string>
+    <string name="character_tofu_speech">뭉개지지 않게 조심해줘!</string>
+    <string name="character_sunfish_name">위기탈출 개복치</string>
+    <string name="character_sunfish_speech">나는 깜짝깜짝 잘 놀라!</string>
+    <string name="character_laika_name">우주여행 라이카</string>
+    <string name="character_laika_speech">무사히 여행할 수 있을까?</string>
+</resources>

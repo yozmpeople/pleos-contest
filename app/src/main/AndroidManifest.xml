@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- AAOS 표준 차량 프로퍼티 -->
+    <!-- 차속 (dangerous, 런타임 요청) -->
+    <uses-permission android:name="android.car.permission.CAR_SPEED" />
+    <!-- 기어, 시동 -->
+    <uses-permission android:name="android.car.permission.CAR_POWERTRAIN" />
+    <!-- 축거 -->
+    <uses-permission android:name="android.car.permission.CAR_INFO" />
+
+    <!-- Pleos Vehicle SDK -->
+    <!-- 하향등, 상향등 -->
+    <uses-permission android:name="pleos.car.permission.CAR_LIGHTS" />
+    <!-- 와이퍼 -->
+    <uses-permission android:name="pleos.car.permission.CAR_WINDOWS" />
+    <!-- 전륜각 -->
+    <uses-permission android:name="pleos.car.permission.CAR_DRIVE" />
+
+    <!-- Pleos FusedLocation SDK 위치 (dangerous, 런타임 요청) -->
+    <uses-permission android:name="pleos.car.permission.FUSED_LOCATION" />
+
+    <!-- 부팅되면 주행 기록 서비스를 시작한다. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <!-- 주행 기록 포그라운드 서비스 -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+
+    <application
+        android:name=".DontSpillApplication"
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.DontSpill">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name=".service.DrivingMonitorService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <!-- 위치는 Android 위치 권한이 아닌 Pleos FusedLocation으로 받아서 location 타입을 쓸 수 없다. -->
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Detects driving from vehicle gear and speed, and records the driving score and distance while driving." />
+        </service>
+
+        <receiver
+            android:name=".service.BootReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+    </application>
+
+</manifest>

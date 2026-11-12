@@ -8,21 +8,14 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.yozmpeople.dontspill.common.debugLog
-import com.yozmpeople.dontspill.data.vehicle.VehicleSignalRepository
 import com.yozmpeople.dontspill.service.DrivingMonitorService
 import com.yozmpeople.dontspill.ui.DontSpillApp
 import com.yozmpeople.dontspill.ui.character.CharacterRepository
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
-import kotlinx.coroutines.launch
 
-private const val TAG = "VehicleSignals"
+private const val TAG = "MainActivity"
 
 // FusedLocation SDK의 PleosPermission은 runtime 의존성(fused-location-data)에 있어 컴파일 때 쓸 수 없다.
 private const val FUSED_LOCATION_PERMISSION = "pleos.car.permission.FUSED_LOCATION"
@@ -45,9 +38,6 @@ private val REQUIRED_PERMISSIONS = arrayOf(
 class MainActivity : ComponentActivity() {
 
     @Inject
-    lateinit var vehicleSignalRepository: VehicleSignalRepository
-
-    @Inject
     lateinit var characterRepository: CharacterRepository
 
     private val permissionLauncher =
@@ -68,13 +58,12 @@ class MainActivity : ComponentActivity() {
             DontSpillApp(characterRepository)
         }
 
-        // 임시: 에뮬레이터에서 차량 신호를 확인하는 연결이다.
         val granted = REQUIRED_PERMISSIONS.all { checkSelfPermission(it) == PackageManager.PERMISSION_GRANTED }
         if (granted) onPermissionsResolved() else permissionLauncher.launch(REQUIRED_PERMISSIONS)
     }
 
+    // 권한 요청 뒤에 서비스를 시작한다. 권한 없이 먼저 등록하면 AAOS 신호는 등록되지 않은 채로 남는다.
     private fun onPermissionsResolved() {
-        logVehicleSignals()
         DrivingMonitorService.startFromForeground(this)
         requestBackgroundLocation()
     }
@@ -87,27 +76,6 @@ class MainActivity : ComponentActivity() {
             checkSelfPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED
         if (foregroundGranted && !backgroundGranted) {
             backgroundLocationLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-        }
-    }
-
-    // 권한 요청 뒤에 구독한다. 권한 없이 먼저 등록하면 AAOS 신호는 등록되지 않은 채로 남는다.
-    private fun logVehicleSignals() {
-        val repository = vehicleSignalRepository
-        lifecycleScope.launch {
-            debugLog(TAG) { "wheelbaseM=${repository.readWheelbaseM()}" }
-        }
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                merge(
-                    repository.speedMps.map { "speedMps $it" },
-                    repository.gear.map { "gear $it" },
-                    repository.lowBeamOn.map { "lowBeamOn $it" },
-                    repository.highBeamOn.map { "highBeamOn $it" },
-                    repository.frontWipersOn.map { "frontWipersOn $it" },
-                    repository.frontWheelAngleDeg.map { "frontWheelAngleDeg $it" },
-                    repository.speedLimitKmh.map { "speedLimitKmh $it" }
-                ).collect { message -> debugLog(TAG) { message } }
-            }
         }
     }
 }

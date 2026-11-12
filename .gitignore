@@ -1,14 +1,9 @@
 # macOS
 .DS_Store
 
-# IDE
+# IDE (Android Studio 개인 설정. 프로젝트를 열면 Gradle 설정으로 다시 만든다)
 *.iml
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
+/.idea/
 
 # Gradle / Android build
 .gradle/

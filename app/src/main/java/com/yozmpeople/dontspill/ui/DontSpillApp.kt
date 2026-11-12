@@ -34,6 +34,9 @@ import kotlinx.coroutines.delay
 
 private const val SPLASH_DURATION_MS = 2_000L
 
+// 스플래시는 고친 뒤 다시 쓴다. 그때까지 앱을 열면 바로 홈을 보인다.
+private const val SPLASH_ENABLED = false
+
 // 화면 전환. 피그마 화면 전환 설정(디졸브, ease out, 300ms)
 private const val SCREEN_TRANSITION_MS = 300
 private val ScreenTransitionSpec: FiniteAnimationSpec<Float> = tween(SCREEN_TRANSITION_MS, easing = EaseOut)
@@ -69,7 +72,7 @@ fun DontSpillApp(characterRepository: CharacterRepository, viewModel: AppViewMod
     val appState by viewModel.uiState.collectAsStateWithLifecycle()
     val character = (appState as? AppUiState.Result)?.uiState?.character ?: selectedCharacter
     // 화면 회전 같은 재생성에서 스플래시를 다시 띄우지 않는다.
-    var showSplash by rememberSaveable { mutableStateOf(true) }
+    var showSplash by rememberSaveable { mutableStateOf(SPLASH_ENABLED) }
     var screen by rememberSaveable { mutableStateOf(AppScreen.Home) }
     LaunchedEffect(Unit) {
         if (showSplash) {

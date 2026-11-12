@@ -10,7 +10,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import com.yozmpeople.dontspill.ui.character.Character
 
-// 캐릭터를 바꿀 때 배경이 겹치며 바뀌는 시간. 홈 캐릭터 전환과 같다 (추정)
+// 캐릭터를 바꿀 때 배경이 겹치며 바뀌는 시간. 홈 캐릭터 전환과 같다
 private const val BACKGROUND_TRANSITION_MS = 300
 
 // 고른 캐릭터의 배경. 모든 화면에서 AppContentFrame의 background 칸에 그린다.

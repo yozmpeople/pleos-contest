@@ -62,12 +62,12 @@ class MainActivity : ComponentActivity() {
             DontSpillApp(characterRepository)
         }
 
-        // 임시: 에뮬레이터에서 차량 신호를 확인하는 연결이다. 화면 지시서에서 대체한다.
+        // 임시: 에뮬레이터에서 차량 신호를 확인하는 연결이다.
         val granted = REQUIRED_PERMISSIONS.all { checkSelfPermission(it) == PackageManager.PERMISSION_GRANTED }
         if (granted) onPermissionsResolved() else permissionLauncher.launch(REQUIRED_PERMISSIONS)
     }
 
-    // 임시: 서비스 시작 지점은 06 지시서 ②(부팅 자동 / 캐릭터 선택)를 정한 뒤 바꾼다.
+    // 임시: 서비스 시작 지점(부팅 자동 / 캐릭터 선택)을 정한 뒤 바꾼다.
     private fun onPermissionsResolved() {
         logVehicleSignals()
         DrivingMonitorService.startFromForeground(this)

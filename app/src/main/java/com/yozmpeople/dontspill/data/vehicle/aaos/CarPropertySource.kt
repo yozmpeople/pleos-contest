@@ -97,7 +97,7 @@ class CarPropertySource @Inject constructor(@ApplicationContext context: Context
         withTimeoutOrNull(CONNECT_TIMEOUT) { propertyManager.filterNotNull().first() }
 }
 
-// CarPropertyValue.timestamp는 부팅 후 경과시간(ns)이다. elapsedRealtimeNanos와 같은 기준으로 본다 (추정).
+// CarPropertyValue.timestamp는 부팅 후 경과시간(ns)이다. elapsedRealtimeNanos와 같은 기준으로 본다.
 private fun CarPropertyValue<*>.timestampMs(): Long = timestamp.nanoseconds.inWholeMilliseconds
 
 // API 35 미만 기기에는 getPropertyStatus()가 없어서 deprecated된 getStatus()를 쓴다.

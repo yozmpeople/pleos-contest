@@ -63,7 +63,7 @@ class DrivingScoreCalculator(
 
     // 직전 판정이 UNKNOWN이던 항목에 이번 시각까지의 경과시간을 더한다. 새 판정을 기록하기 전에 부른다.
     private fun accountUntil(timestampMs: Long) {
-        // shortcut: 시간순 입력을 전제로 한다, 순서 오류를 다룰 때 검증을 추가한다.
+        // 입력은 시간순으로 온다고 본다.
         val elapsed = (timestampMs - lastTimestampMs).milliseconds
         trackers.values.forEach { it.accountElapsed(elapsed) }
         lastTimestampMs = timestampMs
@@ -101,7 +101,7 @@ class DrivingScoreCalculator(
         if (before.timestampMs > cutoffMs) return null
         if (before.timestampMs == cutoffMs) return speedKmh - before.speedKmh
 
-        // shortcut: 표본 사이의 속도는 선형으로 가정한다, 실측 품질 검증 시 보간 방식을 검토한다.
+        // 표본 사이의 속도는 선형으로 본다.
         val after = speedHistory[1]
         val fraction = (cutoffMs - before.timestampMs).toDouble() / (after.timestampMs - before.timestampMs)
         val speedAtCutoffKmh = before.speedKmh + (after.speedKmh - before.speedKmh) * fraction

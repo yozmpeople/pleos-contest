@@ -4,7 +4,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.yozmpeople.dontspill.R
 
-// 도움말 페이지. 선언 순서가 페이지 순서다 (사용자, 2026-11-11)
+// 도움말 페이지. 선언 순서가 페이지 순서다
 // 세로 화면은 이미지 비율이 달라 이미지를 따로 쓰고, 문구는 시안 위치에서 줄을 바꾼 문자열을 쓴다.
 enum class HelpPage(
     @DrawableRes val landscapeImageRes: Int,

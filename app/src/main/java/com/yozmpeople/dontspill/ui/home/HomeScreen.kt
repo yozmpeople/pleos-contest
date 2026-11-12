@@ -62,7 +62,7 @@ import com.yozmpeople.dontspill.ui.theme.ChaduckTheme
 import com.yozmpeople.dontspill.ui.theme.textBold
 import com.yozmpeople.dontspill.ui.theme.textTitle
 
-// 캐릭터를 바꿀 때 애니메이션 시간 (추정)
+// 캐릭터를 바꿀 때 애니메이션 시간
 private const val CHARACTER_TRANSITION_MS = 300
 
 // 가로·세로 시안에서 크기만 다른 요소의 수치
@@ -79,7 +79,6 @@ private class HomeDimens(
     val guideFontSize: TextUnit
 )
 
-// 시안 수치 (사용자, 2026-11-11)
 private val LandscapeDimens = HomeDimens(
     scorePanelSize = DpSize(573.dp, 126.dp),
     scoreTextStartPadding = 50.dp,
@@ -93,7 +92,6 @@ private val LandscapeDimens = HomeDimens(
     guideFontSize = 32.sp
 )
 
-// 세로 시안 수치 (사용자, 2026-11-11)
 private val PortraitDimens = HomeDimens(
     scorePanelSize = DpSize(539.dp, 118.dp),
     scoreTextStartPadding = 40.dp,
@@ -107,7 +105,6 @@ private val PortraitDimens = HomeDimens(
     guideFontSize = 26.sp
 )
 
-// 시안 수치 (사용자, 2026-11-11)
 private val SpeechBubbleSize = DpSize(415.dp, 114.dp)
 private val SelectedCharacterSize = 500.dp
 private val SideCharacterSize = 350.dp
@@ -119,31 +116,29 @@ private val GuideTopSpacing = 73.dp
 private val TopButtonSpacing = 8.dp
 private val SpeechBubbleTopSpacing = 80.dp
 
-// 세로 화면은 공통 여백 대신 홈 시안의 여백을 쓴다 (사용자, 2026-11-11)
+// 세로 화면은 공통 여백 대신 홈 시안의 여백을 쓴다
 private val PortraitPaddingTop = 42.dp
 private val PortraitPaddingBottom = 70.dp
 private val PortraitPaddingHorizontal = 37.dp
 
-// 세로 시안 간격 (사용자, 2026-11-11)
 private val PortraitSpeechBubbleTopSpacing = 138.dp
 private val PortraitNameRowTopSpacing = 27.dp
 private val PortraitGuideTopSpacing = 66.dp
 
-// 말풍선이 가운데 캐릭터 이미지 위쪽과 겹친다. 캐릭터 이미지 안쪽 여백 때문이다 (사용자, 2026-11-11, 시안 눈대중)
+// 말풍선이 가운데 캐릭터 이미지 위쪽과 겹친다. 캐릭터 이미지 안쪽 여백 때문이다
 private val SpeechBubbleOverlap = 30.dp
 
-// 캐릭터와 이름표 사이 최소 간격 (사용자, 2026-11-11)
+// 캐릭터와 이름표 사이 최소 간격
 private val NameRowMinSpacing = 1.dp
 
-// 점수 패널 오른쪽은 트로피 자리라 글자는 왼쪽부터 놓는다. 위아래는 가운데다(가로 31, 세로 30). (사용자, 2026-11-11)
+// 점수 패널 오른쪽은 트로피 자리라 글자는 왼쪽부터 놓는다. 위아래는 가운데다(가로 31, 세로 30).
 private val ScoreTextSpacing = 16.dp
 
-// 말풍선 이미지 아래쪽은 꼬리라 글자 세로 위치는 위 여백으로 정한다. 가로는 가운데다 (사용자, 2026-11-12)
-// 이미지 높이(114dp)의 가운데에 두면 꼬리 때문에 몸통보다 아래로 처진다 (사용자, 2026-11-12)
+// 말풍선 이미지 아래쪽은 꼬리라 글자 세로 위치는 위 여백으로 정한다. 가로는 가운데다
+// 이미지 높이(114dp)의 가운데에 두면 꼬리 때문에 몸통보다 아래로 처진다
 // 몸통은 이미지 위 약 5dp~91dp라 몸통 가운데(약 48dp)와 글자 가운데(30 + 32 / 2 = 46dp)가 거의 같다
 private val SpeechTextTopPadding = 30.dp
 
-// 시안 수치 (사용자, 2026-11-11)
 private val SpeechFontSize = 32.sp
 private val SpeechLineHeight = 32.sp
 

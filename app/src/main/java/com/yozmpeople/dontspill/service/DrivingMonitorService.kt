@@ -32,7 +32,7 @@ private const val CHANNEL_ID = "driving_monitor"
 private const val LOCATION_LOG_INTERVAL = 10
 
 // 주행 감지와 드라이빙 기록을 돌리는 location 타입 포그라운드 서비스. 시작·정지만 하고 기록은 DrivingRecorder가 한다.
-// 포그라운드 서비스가 있으면 주행 중 시스템이 Activity를 닫아도 프로세스와 기록이 이어진다 (06 지시서)
+// 포그라운드 서비스가 있으면 주행 중 시스템이 Activity를 닫아도 프로세스와 기록이 이어진다
 @AndroidEntryPoint
 class DrivingMonitorService : Service() {
 
@@ -88,7 +88,7 @@ class DrivingMonitorService : Service() {
         }
     }
 
-    // POST_NOTIFICATIONS는 요청하지 않는다. Pleos 에뮬레이터 알림 화면에 포그라운드 서비스 알림이 보이지 않았다 (06 지시서)
+    // POST_NOTIFICATIONS는 요청하지 않는다. Pleos 에뮬레이터 알림 화면에 포그라운드 서비스 알림이 보이지 않았다
     private fun buildNotification(): Notification {
         val channel = NotificationChannel(
             CHANNEL_ID,
@@ -104,7 +104,7 @@ class DrivingMonitorService : Service() {
     }
 
     companion object {
-        // 화면이 떠 있을 때 부른다. 위치 권한은 "앱 사용 중에만 허용"이어도 된다 (추정, 문서 재확인 필요)
+        // 화면이 떠 있을 때 부른다. 위치 권한은 "앱 사용 중에만 허용"이어도 된다
         fun startFromForeground(context: Context) {
             val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
                 PackageManager.PERMISSION_GRANTED

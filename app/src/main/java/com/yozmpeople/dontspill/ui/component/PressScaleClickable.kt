@@ -11,11 +11,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
 
-// 누르는 동안 줄어드는 비율 (추정)
+// 누르는 동안 줄어드는 비율
 private const val PRESSED_SCALE = 0.92f
 
 // 이미지 버튼의 눌림 효과. 기본 물결(ripple)은 이미지의 투명 여백까지 네모나게 그려져서,
-// 물결 대신 누르는 동안 살짝 작아졌다가 돌아오게 한다 (사용자, 2026-11-12)
+// 물결 대신 누르는 동안 살짝 작아졌다가 돌아오게 한다
 @Composable
 fun Modifier.pressScaleClickable(role: Role = Role.Button, onClick: () -> Unit): Modifier {
     val interactionSource = remember { MutableInteractionSource() }

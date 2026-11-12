@@ -9,7 +9,7 @@ import kotlin.math.sqrt
 // 지구 평균 반지름(m)
 private const val EARTH_RADIUS_M = 6_371_008.8
 
-// 드라이빙 하나의 위치 점 사이 거리(m)를 이어서 더한다. 점은 걸러내지 않는다 (09 지시서)
+// 드라이빙 하나의 위치 점 사이 거리(m)를 이어서 더한다. 점은 걸러내지 않는다
 // Android Location 없이 단위 테스트하려고 거리는 하버사인 공식으로 계산한다.
 class DrivingDistanceAccumulator {
     // Float 거리를 계속 더하면 오차가 쌓여서 Double로 둔다.

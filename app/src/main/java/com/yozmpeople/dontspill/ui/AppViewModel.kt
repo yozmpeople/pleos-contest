@@ -27,9 +27,9 @@ import kotlinx.coroutines.launch
 private const val STOP_TIMEOUT_MS = 5_000L
 private const val TICK_MS = 1_000L
 
-// 앱을 켰을 때 보일 화면을 주행 상태로 정한다 (사용자, 2026-11-11)
+// 앱을 켰을 때 보일 화면을 주행 상태로 정한다
 // 주행 중 → 주행 중 화면, 안 본 결과 → 결과 화면, 둘 다 아니면 사용자가 고른 화면이다.
-// 백스택 없이 상태로 정하므로 결과 화면에서 끝난 주행 중 화면으로 돌아가지 않는다 (09 지시서)
+// 백스택 없이 상태로 정하므로 결과 화면에서 끝난 주행 중 화면으로 돌아가지 않는다
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class AppViewModel @Inject constructor(

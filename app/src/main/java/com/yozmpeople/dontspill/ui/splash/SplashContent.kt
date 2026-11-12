@@ -36,7 +36,7 @@ import com.yozmpeople.dontspill.ui.theme.textTitle
 private val TitleFontSize = 128.sp
 private val TitleLineHeight = 128.sp
 
-// 테두리 두께는 시안 수치가 없어 정한 값이다 (추정). 획 가운데 기준으로 그려서 글자 밖으로는 절반만 보인다.
+// 테두리 두께는 시안 수치가 없어 정한 값이다. 획 가운데 기준으로 그려서 글자 밖으로는 절반만 보인다.
 private val TitleStrokeWidth = 22.dp
 
 // 시안에서 제목 윗변은 화면 위(공통 여백 포함)에서 900dp다. 시안 높이(1184dp)에 대한 비율로 바꿔

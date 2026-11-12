@@ -77,7 +77,7 @@ private class HelpDimens(
     val pageNumberFontSize: TextUnit
 )
 
-// 이미지 크기를 그대로 시안 크기로 쓴다 (픽셀 ÷ 3 = dp). 나머지는 시안 수치 (사용자, 2026-11-11)
+// 이미지 크기를 그대로 시안 크기로 쓴다 (픽셀 ÷ 3 = dp). 나머지는 시안 수치
 // 카드 아래 여백은 시안 간격을 다 놓고 남는 높이다.
 private val LandscapeDimens = HelpDimens(
     backButtonSize = DpSize(96.dp, 96.dp),
@@ -99,7 +99,7 @@ private val LandscapeDimens = HelpDimens(
 )
 
 // 카드와 페이지 이미지는 세로용 이미지 크기를 그대로 쓴다 (픽셀 ÷ 3 = dp).
-// 나머지는 세로 시안 수치가 없어 정한 값이다 (추정)
+// 나머지는 세로 시안 수치가 없어 정한 값이다
 private val PortraitDimens = HelpDimens(
     backButtonSize = DpSize(84.dp, 84.dp),
     titlePanelSize = DpSize(421.dp, 104.dp),
@@ -119,7 +119,7 @@ private val PortraitDimens = HelpDimens(
     pageNumberFontSize = 40.sp
 )
 
-// 세로 화면은 공통 여백 대신 따로 정한 여백을 쓴다 (추정)
+// 세로 화면은 공통 여백 대신 따로 정한 여백을 쓴다
 private val PortraitPaddingTop = 84.dp
 private val PortraitPaddingBottom = 30.dp
 private val PortraitPaddingHorizontal = 60.dp
@@ -252,7 +252,7 @@ private fun HelpCard(
     }
 }
 
-// 첫·마지막 페이지에서는 없는 화살표 자리를 비워 두어 페이지 숫자가 가운데에 머물게 한다 (사용자, 2026-11-11)
+// 첫·마지막 페이지에서는 없는 화살표 자리를 비워 두어 페이지 숫자가 가운데에 머물게 한다
 @Composable
 private fun Pagination(page: HelpPage, dimens: HelpDimens, onPrevious: () -> Unit, onNext: () -> Unit) {
     val arrowSize = dimens.arrowButtonSize

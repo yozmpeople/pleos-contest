@@ -23,13 +23,13 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
-// 06 지시서 "주행 상태 기준"의 시간
+// 주행 시작을 확정하는 시간
 private val DRIVING_CONFIRM_DURATION = 5.seconds
 
 private const val TAG = "DrivingDetector"
 
 // 기어·차속으로 주행 시작과 종료를 판단한다. 종료는 P 진입이나 사용자 종료뿐이다.
-// 시동은 보지 않는다. 시동을 끄기 전에 P에 넣고, v2.1.0 에뮬레이터는 시동 값을 보내지 않는다 (사용자, 2026-11-12)
+// 시동은 보지 않는다. 시동을 끄기 전에 P에 넣고, v2.1.0 에뮬레이터는 시동 값을 보내지 않는다
 @Singleton
 class DrivingDetector @Inject constructor(
     private val vehicleSignalRepository: VehicleSignalRepository,

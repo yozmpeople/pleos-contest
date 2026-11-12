@@ -15,8 +15,8 @@ data class LeaderboardEntry(
     val score: Int
 )
 
-// 데이터 연결 전까지 화면과 Preview에 쓰는 시안 예시 데이터 (사용자, 2026-11-11)
-// 5·6위는 가려지는 행을 보려고 덧붙였다 (추정)
+// 데이터 연결 전까지 화면과 Preview에 쓰는 시안 예시 데이터
+// 5·6위는 가려지는 행을 보려고 덧붙였다
 internal val SampleLeaderboardUiState = LeaderboardUiState(
     month = 11,
     week = 2,

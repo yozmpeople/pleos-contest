@@ -20,7 +20,6 @@ import com.yozmpeople.dontspill.R
 import com.yozmpeople.dontspill.ui.theme.ChaduckColors
 import com.yozmpeople.dontspill.ui.theme.textSemiBold
 
-// 시안 수치 (사용자, 2026-11-11)
 private val IconPadding = 1.dp
 private val IconSpacing = 8.dp
 

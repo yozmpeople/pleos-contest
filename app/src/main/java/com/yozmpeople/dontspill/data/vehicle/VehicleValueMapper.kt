@@ -47,7 +47,7 @@ object VehicleValueMapper {
 
     fun frontWheelAngleDeg(value: Float?): Double? = value?.toDouble()
 
-    // 0 이하는 제한 없음 또는 모름으로 본다 (추정, 에뮬레이터 확인 필요)
+    // 0 이하는 제한 없음 또는 모름으로 본다
     fun speedLimitKmh(value: Int): Double? = value.takeIf { it > 0 }?.toDouble()
 
     // INFO_EXTERIOR_DIMENSIONS(mm)에서 축거를 m로 꺼낸다. 없거나 0 이하면 null

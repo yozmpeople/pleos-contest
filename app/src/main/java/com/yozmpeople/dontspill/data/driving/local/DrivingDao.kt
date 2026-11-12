@@ -33,7 +33,7 @@ interface DrivingDao {
     )
     fun observeUnshownResults(): Flow<List<DrivingEntity>>
 
-    // 가장 최근 결과만 보여 주고, 쌓인 결과는 모두 본 것으로 한다 (09 지시서)
+    // 가장 최근 결과만 보여 주고, 쌓인 결과는 모두 본 것으로 한다
     @Query("UPDATE driving SET resultShown = 1 WHERE endedAtMs IS NOT NULL")
     suspend fun markAllResultsShown()
 }

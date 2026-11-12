@@ -78,7 +78,7 @@ private class LeaderboardDimens(
 )
 
 // 뒤로 가기·제목은 도움말 가로 수치, 행 높이는 행 이미지 크기(픽셀 ÷ 3 = dp)다.
-// 나머지는 시안 수치가 없어 정한 값이다. 1~3위가 다 보이고 4위 위쪽만 보이게 맞췄다 (추정)
+// 나머지는 시안 수치가 없어 정한 값이다. 1~3위가 다 보이고 4위 위쪽만 보이게 맞췄다
 private val LandscapeDimens = LeaderboardDimens(
     backButtonSize = DpSize(96.dp, 96.dp),
     titlePanelSize = DpSize(514.dp, 125.dp),
@@ -101,7 +101,7 @@ private val LandscapeDimens = LeaderboardDimens(
 )
 
 // 뒤로 가기·제목은 도움말 세로 수치, 행 높이는 세로용 행 이미지 크기(픽셀 ÷ 3 = dp)다.
-// 나머지는 시안 수치가 없어 정한 값이다. 1~4위가 다 보이고 5위 위쪽 끝만 보이게 맞췄다 (추정)
+// 나머지는 시안 수치가 없어 정한 값이다. 1~4위가 다 보이고 5위 위쪽 끝만 보이게 맞췄다
 private val PortraitDimens = LeaderboardDimens(
     backButtonSize = DpSize(84.dp, 84.dp),
     titlePanelSize = DpSize(421.dp, 104.dp),
@@ -123,16 +123,16 @@ private val PortraitDimens = LeaderboardDimens(
     myRankingHeight = 170.dp
 )
 
-// 하단 '내 순위' 영역 아래 모서리. 화면 모서리와 같게 둥글린다 (추정)
+// 하단 '내 순위' 영역 아래 모서리. 화면 모서리와 같게 둥글린다
 private val MyRankingCornerRadius = 40.dp
 
-// 순위 배지. 아래 테두리를 두껍게 그려 입체 버튼처럼 보이게 한다 (추정)
+// 순위 배지. 아래 테두리를 두껍게 그려 입체 버튼처럼 보이게 한다
 private val BadgeCornerRadius = 24.dp
 private val BadgeBorderWidth = 4.dp
 private val BadgeBottomBorderWidth = 10.dp
 private val BadgeBrush = Brush.verticalGradient(listOf(ChaduckColors.Background.Normal, ChaduckColors.Primary.Light))
 
-// 세 자리부터는 배지에 들어가게 글자를 줄인다 (사용자, 2026-11-11)
+// 세 자리부터는 배지에 들어가게 글자를 줄인다
 private const val BADGE_SMALL_FONT_RANK = 100
 
 // 시스템 뒤로 가기도 뒤로 가기 버튼과 같다.
@@ -148,7 +148,7 @@ fun LeaderboardScreen(contentPadding: PaddingValues, onBack: () -> Unit) {
 
 // 배경은 AppContentFrame이 그린다. 위에 뒤로 가기 버튼과 화면 가운데 제목, 아래에 순위 리스트를 놓는다.
 // 스크롤 없이 들어가는 행까지만 보이고, 리스트는 아래 여백 없이 화면 끝까지 그린다.
-// 하단 '내 순위'는 공통 여백 중 좌우·아래를 무시하고 화면 끝에 붙어 리스트 위에 겹친다 (사용자, 2026-11-11)
+// 하단 '내 순위'는 공통 여백 중 좌우·아래를 무시하고 화면 끝에 붙어 리스트 위에 겹친다
 @Composable
 fun LeaderboardContent(
     uiState: LeaderboardUiState,
@@ -208,7 +208,7 @@ private fun TopBar(uiState: LeaderboardUiState, dimens: LeaderboardDimens, onBac
     }
 }
 
-// 행 배경 이미지는 행 크기에 맞춰 늘린다. 세로 화면은 모서리가 눌리지 않게 세로용 이미지를 쓴다 (사용자, 2026-11-11)
+// 행 배경 이미지는 행 크기에 맞춰 늘린다. 세로 화면은 모서리가 눌리지 않게 세로용 이미지를 쓴다
 @Composable
 private fun RankingRow(entry: LeaderboardEntry, dimens: LeaderboardDimens) {
     Box(

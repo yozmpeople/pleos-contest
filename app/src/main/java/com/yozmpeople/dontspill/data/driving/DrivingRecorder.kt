@@ -111,7 +111,7 @@ class DrivingRecorder @Inject constructor(
         }
     }
 
-    // 차속 이벤트마다 나머지 신호의 최신 값으로 입력 1건을 넣는다 (05 지시서 "수집 주기")
+    // 차속 이벤트마다 나머지 신호의 최신 값으로 입력 1건을 넣는다
     // 점수와 횟수는 감점이 확정될 때만 바뀌므로, 횟수가 바뀌었을 때만 저장한다.
     private suspend fun collectInputs(
         startedAtMs: Long,

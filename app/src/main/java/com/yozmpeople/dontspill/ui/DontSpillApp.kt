@@ -1,5 +1,14 @@
 package com.yozmpeople.dontspill.ui
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -25,12 +34,35 @@ import kotlinx.coroutines.delay
 
 private const val SPLASH_DURATION_MS = 2_000L
 
+// 화면 전환. 피그마 화면 전환 설정(디졸브, ease out, 300ms)
+private const val SCREEN_TRANSITION_MS = 300
+private val ScreenTransitionSpec: FiniteAnimationSpec<Float> = tween(SCREEN_TRANSITION_MS, easing = EaseOut)
+
 // 스플래시 뒤에 사용자가 고르는 화면. 주행 중·결과 화면은 AppViewModel이 주행 상태로 정한다.
 private enum class AppScreen { Home, Help, Leaderboard }
 
-// 앱 화면의 루트. 배경은 스플래시만 고정 이미지이고, 나머지 화면은 고른 캐릭터 기준으로 그린다.
-// 결과 화면은 그 드라이빙의 캐릭터 배경을 쓴다.
-// 화면 이동은 백스택 없이 enum과 주행 상태로 정한다 (09 지시서 "검토한 후보와 선택 이유")
+// 지금 보여줄 화면. 주행 중·결과는 값이 계속 바뀌므로 화면 종류(key)가 바뀔 때만 전환한다.
+private sealed interface Destination {
+    val key: Any
+
+    data object Splash : Destination {
+        override val key = this
+    }
+
+    data class Driving(val state: AppUiState.Driving) : Destination {
+        override val key = Driving::class
+    }
+
+    data class Result(val state: AppUiState.Result) : Destination {
+        override val key = Result::class
+    }
+
+    data class Picked(val screen: AppScreen) : Destination {
+        override val key = screen
+    }
+}
+
+
 @Composable
 fun DontSpillApp(characterRepository: CharacterRepository, viewModel: AppViewModel = hiltViewModel()) {
     val selectedCharacter by characterRepository.selected.collectAsStateWithLifecycle()
@@ -45,56 +77,76 @@ fun DontSpillApp(characterRepository: CharacterRepository, viewModel: AppViewMod
             showSplash = false
         }
     }
+    val state = appState
+    val destination = when {
+        showSplash -> Destination.Splash
+        state is AppUiState.Driving -> Destination.Driving(state)
+        state is AppUiState.Result -> Destination.Result(state)
+        else -> Destination.Picked(screen)
+    }
 
     ChaduckTheme {
         AppContentFrame(
             background = {
-                if (showSplash) {
-                    SplashBackground(Modifier.matchParentSize())
-                } else {
-                    CharacterBackground(character, Modifier.matchParentSize())
+                Crossfade(
+                    targetState = showSplash,
+                    modifier = Modifier.matchParentSize(),
+                    animationSpec = ScreenTransitionSpec,
+                    label = "splashBackground"
+                ) { splash ->
+                    if (splash) {
+                        SplashBackground(Modifier.fillMaxSize())
+                    } else {
+                        CharacterBackground(character, Modifier.fillMaxSize())
+                    }
                 }
             }
         ) { contentPadding ->
-            val state = appState
-            if (showSplash) {
-                SplashContent(contentPadding)
-            } else if (state is AppUiState.Driving) {
-                DrivingContent(
-                    uiState = state.uiState,
-                    contentPadding = contentPadding,
-                    onEndDriving = viewModel::onEndDriving
-                )
-            } else if (state is AppUiState.Result) {
-                ResultContent(
-                    uiState = state.uiState,
-                    contentPadding = contentPadding,
-                    onHome = {
-                        screen = AppScreen.Home
-                        viewModel.onResultHome()
-                    }
-                )
-            } else {
-                when (screen) {
-                    AppScreen.Home -> HomeScreen(
+            AnimatedContent(
+                targetState = destination,
+                transitionSpec = { fadeIn(ScreenTransitionSpec) togetherWith fadeOut(ScreenTransitionSpec) },
+                contentKey = { it.key },
+                label = "screen"
+            ) { target ->
+                when (target) {
+                    Destination.Splash -> SplashContent(contentPadding)
+
+                    is Destination.Driving -> DrivingContent(
+                        uiState = target.state.uiState,
                         contentPadding = contentPadding,
-                        onTopButtonClick = { button ->
-                            when (button) {
-                                HomeTopButton.Help -> screen = AppScreen.Help
-                                HomeTopButton.Leaderboard -> screen = AppScreen.Leaderboard
-                            }
+                        onEndDriving = viewModel::onEndDriving
+                    )
+
+                    is Destination.Result -> ResultContent(
+                        uiState = target.state.uiState,
+                        contentPadding = contentPadding,
+                        onHome = {
+                            screen = AppScreen.Home
+                            viewModel.onResultHome()
                         }
                     )
 
-                    AppScreen.Help -> HelpScreen(
-                        contentPadding = contentPadding,
-                        onBack = { screen = AppScreen.Home }
-                    )
+                    is Destination.Picked -> when (target.screen) {
+                        AppScreen.Home -> HomeScreen(
+                            contentPadding = contentPadding,
+                            onTopButtonClick = { button ->
+                                when (button) {
+                                    HomeTopButton.Help -> screen = AppScreen.Help
+                                    HomeTopButton.Leaderboard -> screen = AppScreen.Leaderboard
+                                }
+                            }
+                        )
 
-                    AppScreen.Leaderboard -> LeaderboardScreen(
-                        contentPadding = contentPadding,
-                        onBack = { screen = AppScreen.Home }
-                    )
+                        AppScreen.Help -> HelpScreen(
+                            contentPadding = contentPadding,
+                            onBack = { screen = AppScreen.Home }
+                        )
+
+                        AppScreen.Leaderboard -> LeaderboardScreen(
+                            contentPadding = contentPadding,
+                            onBack = { screen = AppScreen.Home }
+                        )
+                    }
                 }
             }
         }

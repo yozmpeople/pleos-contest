@@ -8,11 +8,12 @@ private const val RELATIVE_TOLERANCE = 1e-12
 
 internal const val RAPID_SPEED_CHANGE_KMH = 30.0
 internal const val SPEEDING_MARGIN_KMH = 15.0
+
 // 받은 알고리즘은 10mm였고, 5mm로 바꿨다.
 internal const val HEAVY_RAIN_MM = 5.0
 
-// 받은 알고리즘의 값 그대로다. m/s²인지 g인지 알고리즘 담당자에게 확인 중이다.
-internal const val HARD_CORNERING_THRESHOLD_MPS2 = 0.3
+// 받은 알고리즘은 0.3m/s²였고, 3.0m/s²로 바꿨다.
+internal const val HARD_CORNERING_THRESHOLD_MPS2 = 3.0
 
 // 단위 환산·보간·삼각함수에서 생기는 부동소수점 오차만 같은 값으로 본다. 판정용 여유 임계값이 아니다.
 internal fun atLeast(value: Double, threshold: Double): Boolean =

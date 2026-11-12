@@ -3,9 +3,7 @@ package com.yozmpeople.dontspill.data.vehicle
 import ai.pleos.playground.vehicle.constant.control.LightState
 import ai.pleos.playground.vehicle.constant.control.WiperState
 import android.car.VehicleGear
-import android.car.VehicleIgnitionState
 import com.yozmpeople.dontspill.data.vehicle.model.Gear
-import com.yozmpeople.dontspill.data.vehicle.model.IgnitionState
 
 // INFO_EXTERIOR_DIMENSIONS 배열에서 축거 위치
 private const val WHEELBASE_INDEX = 4
@@ -33,15 +31,6 @@ object VehicleValueMapper {
         else -> Gear.UNKNOWN
     }
 
-    fun ignition(value: Int): IgnitionState = when (value) {
-        VehicleIgnitionState.LOCK -> IgnitionState.LOCK
-        VehicleIgnitionState.OFF -> IgnitionState.OFF
-        VehicleIgnitionState.ACC -> IgnitionState.ACC
-        VehicleIgnitionState.ON -> IgnitionState.ON
-        VehicleIgnitionState.START -> IgnitionState.START
-        else -> IgnitionState.UNKNOWN
-    }
-
     // ON만 켜짐, OFF만 꺼짐. 주간주행등(지원 안 함)과 null은 모름
     fun lightOn(state: LightState?): Boolean? = when (state) {
         LightState.ON -> true
@@ -58,7 +47,7 @@ object VehicleValueMapper {
 
     fun frontWheelAngleDeg(value: Float?): Double? = value?.toDouble()
 
-    // 0 이하는 제한 없음 또는 모름으로 본다 (추정, 에뮬레이터 확인 필요)
+    // 0 이하는 제한 없음 또는 모름으로 본다
     fun speedLimitKmh(value: Int): Double? = value.takeIf { it > 0 }?.toDouble()
 
     // INFO_EXTERIOR_DIMENSIONS(mm)에서 축거를 m로 꺼낸다. 없거나 0 이하면 null

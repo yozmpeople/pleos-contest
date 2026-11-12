@@ -9,9 +9,13 @@ import androidx.room3.PrimaryKey
 data class DrivingEntity(
     @PrimaryKey val drivingId: String,
     val startedAtMs: Long,
-    // P 진입 또는 시동 OFF 시각. 주행 중이면 null
+    // P 진입 또는 사용자 종료 시각. 주행 중이면 null
     val endedAtMs: Long?,
     val score: Int,
+    // 드라이빙을 시작할 때 고른 캐릭터의 enum 이름
+    val character: String,
+    // 위치 점 사이 거리를 더한 값(m). 드라이빙이 끝날 때 넣는다.
+    val distanceMeters: Double,
     // PenaltyFactor 이름 → 횟수 JSON
     val penaltyCounts: String,
     val resultShown: Boolean

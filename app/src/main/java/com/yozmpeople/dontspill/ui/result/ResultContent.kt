@@ -66,7 +66,7 @@ private class ResultDimens(
 )
 
 // 등급 로고 높이는 이미지 크기(501px ÷ 3 = 167dp), 버튼은 주행 중 가로 버튼 수치다.
-// 나머지는 시안 수치가 없어 정한 값이다 (추정)
+// 나머지는 시안 수치가 없어 정한 값이다
 private val LandscapeDimens = ResultDimens(
     stickerHeight = 167.dp,
     homeButtonSize = DpSize(512.dp, 170.dp),
@@ -80,7 +80,7 @@ private val LandscapeDimens = ResultDimens(
     infoRowSpacing = 30.dp
 )
 
-// 버튼은 주행 중 세로 버튼 수치다. 나머지는 시안 수치가 없어 정한 값이다 (추정)
+// 버튼은 주행 중 세로 버튼 수치다. 나머지는 시안 수치가 없어 정한 값이다
 private val PortraitDimens = ResultDimens(
     stickerHeight = 167.dp,
     homeButtonSize = DpSize(400.dp, 132.dp),
@@ -94,10 +94,10 @@ private val PortraitDimens = ResultDimens(
     infoRowSpacing = 20.dp
 )
 
-// 가로 결과 패널의 왼쪽 모서리 (추정). 오른쪽은 화면 끝에 붙어 있어 앱 창 모서리가 둥글게 잘라 준다 (사용자, 2026-11-11)
+// 가로 결과 패널의 왼쪽 모서리. 오른쪽은 화면 끝에 붙어 있어 앱 창 모서리가 둥글게 잘라 준다
 private val LandscapePanelCornerRadius = 64.dp
 
-// 등급별 캐릭터. 가로·세로 같은 크기이고, 공간이 모자라면 남는 높이·너비에 맞춰 줄인다 (사용자, 2026-11-11)
+// 등급별 캐릭터. 가로·세로 같은 크기이고, 공간이 모자라면 남는 높이·너비에 맞춰 줄인다
 private val CharacterSize = 560.dp
 
 private val PortraitStickerTopPadding = 50.dp
@@ -105,10 +105,10 @@ private val PortraitPanelPaddingTop = 60.dp
 private val PortraitPanelPaddingBottom = 80.dp
 private val PortraitHomeButtonTopSpacing = 64.dp
 
-// 배경은 AppContentFrame이 그린다. 이번 버전은 최종 점수·주행 시간·주행 거리만 보인다 (사용자, 2026-11-11)
+// 배경은 AppContentFrame이 그린다. 이번 버전은 최종 점수·주행 시간·주행 거리만 보인다
 // 가로는 좌우로 나누고 스크롤하지 않는다. 캐릭터 영역은 공통 여백 중 위·아래만 쓰고 좌우 여백은 쓰지 않는다.
-// 결과 패널(흰 배경)은 공통 여백을 무시하고 화면 위·오른쪽·아래 끝까지 채운다 (사용자, 2026-11-11)
-// 캐릭터 영역과 결과 패널은 화면 너비를 반씩 나눈다 (사용자, 2026-11-11)
+// 결과 패널(흰 배경)은 공통 여백을 무시하고 화면 위·오른쪽·아래 끝까지 채운다
+// 캐릭터 영역과 결과 패널은 화면 너비를 반씩 나눈다
 // 세로는 공통 여백 없이 위아래로 나누고, 내용이 화면보다 길면 화면 전체를 세로로 스크롤한다.
 @Composable
 fun ResultContent(
@@ -123,7 +123,7 @@ fun ResultContent(
     }
 }
 
-// 왼쪽은 등급 로고·캐릭터·홈 버튼을 한 묶음으로 가운데에 놓는다 (사용자, 2026-11-11)
+// 왼쪽은 등급 로고·캐릭터·홈 버튼을 한 묶음으로 가운데에 놓는다
 // 높이가 모자라면 캐릭터만 줄어든다.
 @Composable
 private fun LandscapeResult(
@@ -170,7 +170,7 @@ private fun LandscapeResult(
 @Composable
 private fun PortraitResult(uiState: ResultUiState, onHome: () -> Unit, modifier: Modifier) {
     val dimens = PortraitDimens
-    // 캐릭터 영역은 등급 로고·캐릭터 높이만큼이고, 결과 패널은 적어도 나머지 높이를 채운다 (사용자, 2026-11-11)
+    // 캐릭터 영역은 등급 로고·캐릭터 높이만큼이고, 결과 패널은 적어도 나머지 높이를 채운다
     // 스크롤 안에서는 높이 제한이 없어서, 바깥에서 화면 크기를 재 두고 패널 최소 높이를 계산한다.
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val characterHeight = PortraitStickerTopPadding.scaled + dimens.stickerHeight.scaled +
@@ -278,7 +278,7 @@ private fun ResultInfo(uiState: ResultUiState, dimens: ResultDimens) {
     }
 }
 
-// 항목명은 700, 값은 800이다 (사용자, 2026-11-11)
+// 항목명은 700, 값은 800이다
 @Composable
 private fun InfoRow(label: String, value: String, dimens: ResultDimens) {
     val labelStyle = infoStyle(MaterialTheme.typography.textBold, dimens)
@@ -294,7 +294,7 @@ private fun InfoRow(label: String, value: String, dimens: ResultDimens) {
 private fun infoStyle(base: TextStyle, dimens: ResultDimens): TextStyle =
     base.copy(fontSize = dimens.infoFontSize, lineHeight = dimens.infoFontSize).scaled()
 
-// 시안 예시 점수: 99점 PERFECT, 75점 GOOD, 68점 BAD (사용자, 2026-11-11)
+// 시안 예시 점수: 99점 PERFECT, 75점 GOOD, 68점 BAD
 @Composable
 private fun ResultPreviewFrame(score: Int) {
     val character = Character.WaterCup
@@ -323,8 +323,8 @@ private fun ResultPreviewFrame(score: Int) {
 //    ResultPreviewFrame(score = 99)
 //}
 
-//@PleosLandscapePreviews
-@PleosPortraitPreviews
+@PleosLandscapePreviews
+//@PleosPortraitPreviews
 @Composable
 private fun ResultGoodPreview() {
     ResultPreviewFrame(score = 75)

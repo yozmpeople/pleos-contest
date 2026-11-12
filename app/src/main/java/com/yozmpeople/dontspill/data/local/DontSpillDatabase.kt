@@ -5,7 +5,7 @@ import androidx.room3.RoomDatabase
 import com.yozmpeople.dontspill.data.driving.local.DrivingDao
 import com.yozmpeople.dontspill.data.driving.local.DrivingEntity
 
-@Database(entities = [DrivingEntity::class], version = 1)
+@Database(entities = [DrivingEntity::class], version = 2)
 abstract class DontSpillDatabase : RoomDatabase() {
     abstract fun drivingDao(): DrivingDao
 }

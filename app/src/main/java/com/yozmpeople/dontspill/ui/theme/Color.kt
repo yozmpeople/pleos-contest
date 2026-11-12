@@ -38,7 +38,7 @@ internal object ChaduckColors {
     }
 }
 
-// Material 컴포넌트가 기본 보라색 대신 차덕 색을 쓰게 주요 역할만 매핑한다.
+// Material 컴포넌트가 기본 보라색 대신 앱 색을 쓰게 주요 역할만 매핑한다.
 // 화면에서는 ChaduckColors를 직접 쓴다.
 internal val LightColorScheme = lightColorScheme(
     primary = ChaduckColors.Primary.Normal,

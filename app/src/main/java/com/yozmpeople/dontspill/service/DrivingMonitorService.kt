@@ -1,6 +1,5 @@
 package com.yozmpeople.dontspill.service
 
-import android.Manifest
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -16,35 +15,23 @@ import androidx.core.content.ContextCompat
 import com.yozmpeople.dontspill.R
 import com.yozmpeople.dontspill.common.debugLog
 import com.yozmpeople.dontspill.data.driving.DrivingRecorder
-import com.yozmpeople.dontspill.data.location.LocationRepository
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
 
 private const val TAG = "DrivingMonitorService"
 private const val NOTIFICATION_ID = 1
 private const val CHANNEL_ID = "driving_monitor"
-private const val LOCATION_LOG_INTERVAL = 10
 
-// 주행 감지와 드라이빙 기록을 돌리는 location 타입 포그라운드 서비스. 시작·정지만 하고 기록은 DrivingRecorder가 한다.
-// 포그라운드 서비스가 있으면 주행 중 시스템이 Activity를 닫아도 프로세스와 기록이 이어진다 (06 지시서)
+// FusedLocation SDK의 PleosPermission은 runtime 의존성(fused-location-data)에 있어 컴파일 때 쓸 수 없다.
+internal const val FUSED_LOCATION_PERMISSION = "pleos.car.permission.FUSED_LOCATION"
+
+// 주행 감지와 드라이빙 기록을 돌리는 포그라운드 서비스. 시작·정지만 하고 기록은 DrivingRecorder가 한다.
+// 포그라운드 서비스가 있으면 주행 중 시스템이 Activity를 닫아도 프로세스와 기록이 이어진다
 @AndroidEntryPoint
 class DrivingMonitorService : Service() {
 
     @Inject
     lateinit var drivingRecorder: DrivingRecorder
-
-    @Inject
-    lateinit var locationRepository: LocationRepository
-
-    // 서비스가 살아 있는 동안만 쓰는 범위. onDestroy에서 취소한다.
-    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-    private var locationLogJob: Job? = null
 
     // 바인드는 쓰지 않는다. startForegroundService로만 시작한다.
     override fun onBind(intent: Intent?): IBinder? = null
@@ -55,40 +42,25 @@ class DrivingMonitorService : Service() {
                 this,
                 NOTIFICATION_ID,
                 buildNotification(),
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
             )
         } catch (e: SecurityException) {
-            // 위치 권한이 없거나, 화면 없이 다시 시작돼 "앱 사용 중에만 허용" 권한으로는 띄울 수 없을 때
+            // 시스템이 포그라운드 서비스 시작을 막았을 때
             debugLog(TAG) { "포그라운드 시작 실패: $e" }
             stopSelf()
             return START_NOT_STICKY
         }
         drivingRecorder.start()
-        logLocationCount()
         return START_STICKY
     }
 
     // 주행 중이면 지금 시각으로 드라이빙을 끝낸다.
     override fun onDestroy() {
-        serviceScope.cancel()
         drivingRecorder.stop()
         super.onDestroy()
     }
 
-    // 임시: 화면이 없을 때도 위치가 오는지 확인하는 로그다. 출몰시각·강수량 API를 연결하면 대체한다.
-    // 좌표는 남기지 않고 수신 건수만 남긴다.
-    private fun logLocationCount() {
-        if (locationLogJob?.isActive == true) return
-        locationLogJob = serviceScope.launch {
-            var count = 0
-            locationRepository.location.collect {
-                count++
-                if (count == 1 || count % LOCATION_LOG_INTERVAL == 0) debugLog(TAG) { "위치 수신 ${count}건" }
-            }
-        }
-    }
-
-    // POST_NOTIFICATIONS는 요청하지 않는다. Pleos 에뮬레이터 알림 화면에 포그라운드 서비스 알림이 보이지 않았다 (06 지시서)
+    // POST_NOTIFICATIONS는 요청하지 않는다. Pleos 에뮬레이터 알림 화면에 포그라운드 서비스 알림이 보이지 않았다
     private fun buildNotification(): Notification {
         val channel = NotificationChannel(
             CHANNEL_ID,
@@ -104,9 +76,9 @@ class DrivingMonitorService : Service() {
     }
 
     companion object {
-        // 화면이 떠 있을 때 부른다. 위치 권한은 "앱 사용 중에만 허용"이어도 된다 (추정, 문서 재확인 필요)
-        fun startFromForeground(context: Context) {
-            val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
+        // 앱 화면과 부팅 수신기에서 부른다. 위치는 Pleos FusedLocation으로만 받아서 Android 위치 권한은 쓰지 않는다.
+        fun start(context: Context) {
+            val granted = ContextCompat.checkSelfPermission(context, FUSED_LOCATION_PERMISSION) ==
                 PackageManager.PERMISSION_GRANTED
             if (!granted) {
                 debugLog(TAG) { "위치 권한이 없어 서비스를 시작하지 않음" }

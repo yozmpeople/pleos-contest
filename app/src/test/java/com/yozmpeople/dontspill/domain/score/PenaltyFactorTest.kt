@@ -48,8 +48,8 @@ class PenaltyFactorTest {
     fun `코너링은 좌우 방향과 상관없이 횡가속도 크기로 본다`() {
         val cornering = PenaltyFactor.HARD_CORNERING
 
-        assertEquals(MET, cornering.condition(PenaltyInputs(lateralAccelMps2 = -0.3)))
-        assertEquals(NOT_MET, cornering.condition(PenaltyInputs(lateralAccelMps2 = 0.29)))
+        assertEquals(MET, cornering.condition(PenaltyInputs(lateralAccelMps2 = -3.0)))
+        assertEquals(NOT_MET, cornering.condition(PenaltyInputs(lateralAccelMps2 = 2.99)))
         assertEquals(UNKNOWN, cornering.condition(PenaltyInputs()))
     }
 

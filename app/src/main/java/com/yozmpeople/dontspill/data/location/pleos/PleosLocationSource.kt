@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.callbackFlow
 private const val TAG = "PleosLocationSource"
 
 // Pleos FusedLocation SDK로 위치를 구독한다. SDK 값을 그대로 내보내고, 앱 값으로 바꾸는 일은 저장소에서 한다.
-// 수신 주기를 정하는 API가 없다. 에뮬레이터에서는 약 1초마다 왔다 (차덕 검증 노트 3-16)
+// 수신 주기를 정하는 API가 없다. 에뮬레이터에서는 약 1초마다 왔다
 @Singleton
 class PleosLocationSource @Inject constructor(@ApplicationContext context: Context) {
 

@@ -19,7 +19,7 @@ enum class ResultGrade(@DrawableRes val stickerRes: Int, @StringRes val descript
     }
 
     companion object {
-        // 시안 예시는 99점 PERFECT, 75점 GOOD, 68점 BAD다. 경계 점수는 받지 못해 정한 값이다 (추정)
+        // 시안 예시는 99점 PERFECT, 75점 GOOD, 68점 BAD다. 경계 점수는 받지 못해 정한 값이다
         private const val PERFECT_MIN_SCORE = 90
         private const val GOOD_MIN_SCORE = 70
 

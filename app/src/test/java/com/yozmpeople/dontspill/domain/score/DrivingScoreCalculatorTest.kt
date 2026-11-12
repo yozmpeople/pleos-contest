@@ -101,18 +101,18 @@ class DrivingScoreCalculatorTest {
     }
 
     @Test
-    fun `횡가속 추정값 -0_3이 2초 이어지면 무리한 코너링 1회 97점`() {
-        val result = (0..2).map { calculator.update(cornering(it.toDouble(), lateralAccelMps2 = -0.3)) }.last()
+    fun `횡가속 추정값 -3_0이 2초 이어지면 무리한 코너링 1회 97점`() {
+        val result = (0..2).map { calculator.update(cornering(it.toDouble(), lateralAccelMps2 = -3.0)) }.last()
 
         assertOccurred(result, PenaltyFactor.HARD_CORNERING, count = 1, score = 97)
     }
 
     @Test
     fun `전륜각이 null이면 코너링은 판정 불가이고 진행 중인 2초 확인을 처음부터 다시 잰다`() {
-        calculator.update(cornering(0.0, lateralAccelMps2 = 0.5))
-        calculator.update(cornering(1.5, lateralAccelMps2 = 0.5))
+        calculator.update(cornering(0.0, lateralAccelMps2 = 5.0))
+        calculator.update(cornering(1.5, lateralAccelMps2 = 5.0))
         calculator.update(input(1.8, speedKmh = CORNERING_SPEED_MPS * 3.6, frontWheelAngleDeg = null))
-        val result = calculator.update(cornering(3.0, lateralAccelMps2 = 0.5))
+        val result = calculator.update(cornering(3.0, lateralAccelMps2 = 5.0))
 
         assertOccurred(result, PenaltyFactor.HARD_CORNERING, count = 0, score = 100)
         // 1.8초 판정 불가부터 3초 입력까지
@@ -121,20 +121,20 @@ class DrivingScoreCalculatorTest {
 
     @Test
     fun `코너링 1초 뒤 판정 불가 뒤 다시 1초면 합산하지 않는다`() {
-        calculator.update(cornering(0.0, lateralAccelMps2 = 0.5))
-        calculator.update(cornering(1.0, lateralAccelMps2 = 0.5))
+        calculator.update(cornering(0.0, lateralAccelMps2 = 5.0))
+        calculator.update(cornering(1.0, lateralAccelMps2 = 5.0))
         calculator.update(input(1.5, speedKmh = CORNERING_SPEED_MPS * 3.6))
-        calculator.update(cornering(2.0, lateralAccelMps2 = 0.5))
-        val result = calculator.update(cornering(3.0, lateralAccelMps2 = 0.5))
+        calculator.update(cornering(2.0, lateralAccelMps2 = 5.0))
+        val result = calculator.update(cornering(3.0, lateralAccelMps2 = 5.0))
 
         assertOccurred(result, PenaltyFactor.HARD_CORNERING, count = 0, score = 100)
     }
 
     @Test
     fun `이미 센 코너링은 판정 불가를 지나 같은 조건이 다시 와도 정상 복귀 전에는 세지 않는다`() {
-        (0..2).forEach { calculator.update(cornering(it.toDouble(), lateralAccelMps2 = 0.5)) }
+        (0..2).forEach { calculator.update(cornering(it.toDouble(), lateralAccelMps2 = 5.0)) }
         calculator.update(input(3.0, speedKmh = CORNERING_SPEED_MPS * 3.6))
-        val result = (4..6).map { calculator.update(cornering(it.toDouble(), lateralAccelMps2 = 0.5)) }.last()
+        val result = (4..6).map { calculator.update(cornering(it.toDouble(), lateralAccelMps2 = 5.0)) }.last()
 
         assertOccurred(result, PenaltyFactor.HARD_CORNERING, count = 1, score = 97)
     }
@@ -155,7 +155,7 @@ class DrivingScoreCalculatorTest {
 
     @Test
     fun `일곱 항목이 한 번씩 발생하면 61점`() {
-        val corneringAngle = angleFor(lateralAccelMps2 = 0.5, speedMps = 60.0 / 3.6)
+        val corneringAngle = angleFor(lateralAccelMps2 = 5.0, speedMps = 60.0 / 3.6)
         var result = calculator.result()
         for (second in 0..60) {
             result = calculator.update(

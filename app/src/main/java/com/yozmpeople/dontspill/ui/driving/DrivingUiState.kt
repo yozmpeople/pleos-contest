@@ -9,7 +9,7 @@ data class DrivingUiState(
     val elapsedSeconds: Long
 )
 
-// 주행 시간 표시. 시:분:초를 두 자리씩 쓴다 (사용자, 2026-11-11)
+// 주행 시간 표시. 시:분:초를 두 자리씩 쓴다
 fun formatDrivingTime(elapsedSeconds: Long): String {
     val hours = elapsedSeconds / 3600
     val minutes = elapsedSeconds % 3600 / 60

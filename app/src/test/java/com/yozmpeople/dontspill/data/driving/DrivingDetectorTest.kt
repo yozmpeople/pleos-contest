@@ -3,7 +3,6 @@ package com.yozmpeople.dontspill.data.driving
 import com.yozmpeople.dontspill.data.driving.model.DrivingState
 import com.yozmpeople.dontspill.data.vehicle.VehicleSignalRepository
 import com.yozmpeople.dontspill.data.vehicle.model.Gear
-import com.yozmpeople.dontspill.data.vehicle.model.IgnitionState
 import com.yozmpeople.dontspill.data.vehicle.model.VehicleReading
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -57,7 +56,7 @@ class DrivingDetectorTest {
     }
 
     @Test
-    fun `시동과 기어 값이 오지 않아도 차속이 있으면 주행이다`() = runTest {
+    fun `기어 값이 오지 않아도 차속이 있으면 주행이다`() = runTest {
         val detector = startDetector()
 
         vehicle.speed(10.0)
@@ -106,23 +105,26 @@ class DrivingDetectorTest {
     }
 
     @Test
-    fun `시동이 꺼지면 주행 중이어도 바로 끝난다`() = runTest {
+    fun `종료를 누르면 주행이 끝나고 신호가 그대로면 다시 시작하지 않는다`() = runTest {
         val detector = startDriving()
 
-        vehicle.ignition(IgnitionState.OFF)
-        waitMs(0)
+        detector.endDriving()
+        waitMs(10_000)
 
         assertEquals(DrivingState.Idle, detector.state.value)
     }
 
     @Test
-    fun `시동 ACC는 꺼짐으로 보지 않는다`() = runTest {
+    fun `종료 뒤 멈췄다 다시 움직이면 새 주행이 시작된다`() = runTest {
         val detector = startDriving()
 
-        vehicle.ignition(IgnitionState.ACC)
-        waitMs(10_000)
+        detector.endDriving()
+        vehicle.stop()
+        waitMs(1_000)
+        vehicle.move()
+        waitMs(5_000)
 
-        assertEquals(DrivingState.Driving(startedAtMs = 0), detector.state.value)
+        assertEquals(DrivingState.Driving(startedAtMs = 6_000), detector.state.value)
     }
 
     // 0ms에 움직이기 시작해 5,000ms에 주행이 된 상태
@@ -147,15 +149,13 @@ class DrivingDetectorTest {
     }
 }
 
-// 기어·차속·시동만 넣을 수 있는 가짜 저장소. 넣지 않은 신호는 값이 오지 않는 것과 같다.
+// 기어·차속만 넣을 수 있는 가짜 저장소. 넣지 않은 신호는 값이 오지 않는 것과 같다.
 private class FakeVehicleSignalRepository : VehicleSignalRepository {
     private val gearFlow = MutableSharedFlow<VehicleReading<Gear>>(replay = 1)
     private val speedFlow = MutableSharedFlow<VehicleReading<Double>>(replay = 1)
-    private val ignitionFlow = MutableSharedFlow<VehicleReading<IgnitionState>>(replay = 1)
 
     override val gear: Flow<VehicleReading<Gear>> = gearFlow
     override val speedMps: Flow<VehicleReading<Double>> = speedFlow
-    override val ignition: Flow<VehicleReading<IgnitionState>> = ignitionFlow
     override val lowBeamOn: Flow<VehicleReading<Boolean?>> = emptyFlow()
     override val highBeamOn: Flow<VehicleReading<Boolean?>> = emptyFlow()
     override val frontWipersOn: Flow<VehicleReading<Boolean?>> = emptyFlow()
@@ -170,10 +170,6 @@ private class FakeVehicleSignalRepository : VehicleSignalRepository {
 
     fun speed(value: Double) {
         speedFlow.tryEmit(VehicleReading(0, value))
-    }
-
-    fun ignition(value: IgnitionState) {
-        ignitionFlow.tryEmit(VehicleReading(0, value))
     }
 
     fun move() {

@@ -1,5 +1,14 @@
 package com.yozmpeople.dontspill.ui
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -7,14 +16,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.yozmpeople.dontspill.ui.character.CharacterRepository
 import com.yozmpeople.dontspill.ui.component.AppContentFrame
 import com.yozmpeople.dontspill.ui.component.CharacterBackground
+import com.yozmpeople.dontspill.ui.driving.DrivingContent
 import com.yozmpeople.dontspill.ui.help.HelpScreen
 import com.yozmpeople.dontspill.ui.home.HomeScreen
 import com.yozmpeople.dontspill.ui.home.HomeTopButton
 import com.yozmpeople.dontspill.ui.leaderboard.LeaderboardScreen
+import com.yozmpeople.dontspill.ui.result.ResultContent
 import com.yozmpeople.dontspill.ui.splash.SplashBackground
 import com.yozmpeople.dontspill.ui.splash.SplashContent
 import com.yozmpeople.dontspill.ui.theme.ChaduckTheme
@@ -22,16 +34,45 @@ import kotlinx.coroutines.delay
 
 private const val SPLASH_DURATION_MS = 2_000L
 
-// 스플래시 뒤에 보이는 화면
+// 스플래시는 고친 뒤 다시 쓴다. 그때까지 앱을 열면 바로 홈을 보인다.
+private const val SPLASH_ENABLED = false
+
+// 화면 전환. 피그마 화면 전환 설정(디졸브, ease out, 300ms)
+private const val SCREEN_TRANSITION_MS = 300
+private val ScreenTransitionSpec: FiniteAnimationSpec<Float> = tween(SCREEN_TRANSITION_MS, easing = EaseOut)
+
+// 스플래시 뒤에 사용자가 고르는 화면. 주행 중·결과 화면은 AppViewModel이 주행 상태로 정한다.
 private enum class AppScreen { Home, Help, Leaderboard }
 
-// 앱 화면의 루트. 배경은 스플래시만 고정 이미지이고, 나머지 화면은 고른 캐릭터 기준으로 그린다.
-// 화면이 더 늘면 Navigation 도입을 검토한다 (04 지시서 "미정")
+// 지금 보여줄 화면. 주행 중·결과는 값이 계속 바뀌므로 화면 종류(key)가 바뀔 때만 전환한다.
+private sealed interface Destination {
+    val key: Any
+
+    data object Splash : Destination {
+        override val key = this
+    }
+
+    data class Driving(val state: AppUiState.Driving) : Destination {
+        override val key = Driving::class
+    }
+
+    data class Result(val state: AppUiState.Result) : Destination {
+        override val key = Result::class
+    }
+
+    data class Picked(val screen: AppScreen) : Destination {
+        override val key = screen
+    }
+}
+
+
 @Composable
-fun DontSpillApp(characterRepository: CharacterRepository) {
-    val character by characterRepository.selected.collectAsStateWithLifecycle()
+fun DontSpillApp(characterRepository: CharacterRepository, viewModel: AppViewModel = hiltViewModel()) {
+    val selectedCharacter by characterRepository.selected.collectAsStateWithLifecycle()
+    val appState by viewModel.uiState.collectAsStateWithLifecycle()
+    val character = (appState as? AppUiState.Result)?.uiState?.character ?: selectedCharacter
     // 화면 회전 같은 재생성에서 스플래시를 다시 띄우지 않는다.
-    var showSplash by rememberSaveable { mutableStateOf(true) }
+    var showSplash by rememberSaveable { mutableStateOf(SPLASH_ENABLED) }
     var screen by rememberSaveable { mutableStateOf(AppScreen.Home) }
     LaunchedEffect(Unit) {
         if (showSplash) {
@@ -39,42 +80,76 @@ fun DontSpillApp(characterRepository: CharacterRepository) {
             showSplash = false
         }
     }
+    val state = appState
+    val destination = when {
+        showSplash -> Destination.Splash
+        state is AppUiState.Driving -> Destination.Driving(state)
+        state is AppUiState.Result -> Destination.Result(state)
+        else -> Destination.Picked(screen)
+    }
 
     ChaduckTheme {
         AppContentFrame(
             background = {
-                if (showSplash) {
-                    SplashBackground(Modifier.matchParentSize())
-                } else {
-                    CharacterBackground(character, Modifier.matchParentSize())
+                Crossfade(
+                    targetState = showSplash,
+                    modifier = Modifier.matchParentSize(),
+                    animationSpec = ScreenTransitionSpec,
+                    label = "splashBackground"
+                ) { splash ->
+                    if (splash) {
+                        SplashBackground(Modifier.fillMaxSize())
+                    } else {
+                        CharacterBackground(character, Modifier.fillMaxSize())
+                    }
                 }
             }
         ) { contentPadding ->
-            if (showSplash) {
-                SplashContent(contentPadding)
-            } else {
-                when (screen) {
-                    // 업적·주행 기록 화면은 아직 없다. 해당 화면을 만들 때 연결한다.
-                    AppScreen.Home -> HomeScreen(
+            AnimatedContent(
+                targetState = destination,
+                transitionSpec = { fadeIn(ScreenTransitionSpec) togetherWith fadeOut(ScreenTransitionSpec) },
+                contentKey = { it.key },
+                label = "screen"
+            ) { target ->
+                when (target) {
+                    Destination.Splash -> SplashContent(contentPadding)
+
+                    is Destination.Driving -> DrivingContent(
+                        uiState = target.state.uiState,
                         contentPadding = contentPadding,
-                        onTopButtonClick = { button ->
-                            when (button) {
-                                HomeTopButton.Help -> screen = AppScreen.Help
-                                HomeTopButton.Leaderboard -> screen = AppScreen.Leaderboard
-                                else -> Unit
-                            }
+                        onEndDriving = viewModel::onEndDriving
+                    )
+
+                    is Destination.Result -> ResultContent(
+                        uiState = target.state.uiState,
+                        contentPadding = contentPadding,
+                        onHome = {
+                            screen = AppScreen.Home
+                            viewModel.onResultHome()
                         }
                     )
 
-                    AppScreen.Help -> HelpScreen(
-                        contentPadding = contentPadding,
-                        onBack = { screen = AppScreen.Home }
-                    )
+                    is Destination.Picked -> when (target.screen) {
+                        AppScreen.Home -> HomeScreen(
+                            contentPadding = contentPadding,
+                            onTopButtonClick = { button ->
+                                when (button) {
+                                    HomeTopButton.Help -> screen = AppScreen.Help
+                                    HomeTopButton.Leaderboard -> screen = AppScreen.Leaderboard
+                                }
+                            }
+                        )
 
-                    AppScreen.Leaderboard -> LeaderboardScreen(
-                        contentPadding = contentPadding,
-                        onBack = { screen = AppScreen.Home }
-                    )
+                        AppScreen.Help -> HelpScreen(
+                            contentPadding = contentPadding,
+                            onBack = { screen = AppScreen.Home }
+                        )
+
+                        AppScreen.Leaderboard -> LeaderboardScreen(
+                            contentPadding = contentPadding,
+                            onBack = { screen = AppScreen.Home }
+                        )
+                    }
                 }
             }
         }

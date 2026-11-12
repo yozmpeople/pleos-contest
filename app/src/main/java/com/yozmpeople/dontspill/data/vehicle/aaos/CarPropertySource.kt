@@ -28,7 +28,7 @@ private const val TAG = "CarPropertySource"
 private const val GLOBAL_AREA_ID = 0
 private val CONNECT_TIMEOUT = 10.seconds
 
-// AAOS CarPropertyManager로 차속·기어·시동을 구독하고, 차량 외형 치수를 한 번 읽는다.
+// AAOS CarPropertyManager로 차속·기어를 구독하고, 차량 외형 치수를 한 번 읽는다.
 // SDK 값을 그대로 내보내고, 앱 값으로 바꾸는 일은 저장소에서 한다.
 @OptIn(ExperimentalCoroutinesApi::class)
 @Singleton
@@ -52,10 +52,6 @@ class CarPropertySource @Inject constructor(@ApplicationContext context: Context
     // VehicleGear 값
     fun observeGear(): Flow<VehicleReading<Int>> =
         observe(VehiclePropertyIds.GEAR_SELECTION, CarPropertyManager.SENSOR_RATE_ONCHANGE).castValues()
-
-    // VehicleIgnitionState 값
-    fun observeIgnition(): Flow<VehicleReading<Int>> =
-        observe(VehiclePropertyIds.IGNITION_STATE, CarPropertyManager.SENSOR_RATE_ONCHANGE).castValues()
 
     // INFO_EXTERIOR_DIMENSIONS 배열(mm). 연결되지 않았거나 읽지 못하면 null
     suspend fun readExteriorDimensions(): IntArray? {
@@ -101,7 +97,7 @@ class CarPropertySource @Inject constructor(@ApplicationContext context: Context
         withTimeoutOrNull(CONNECT_TIMEOUT) { propertyManager.filterNotNull().first() }
 }
 
-// CarPropertyValue.timestamp는 부팅 후 경과시간(ns)이다. elapsedRealtimeNanos와 같은 기준으로 본다 (추정).
+// CarPropertyValue.timestamp는 부팅 후 경과시간(ns)이다. elapsedRealtimeNanos와 같은 기준으로 본다.
 private fun CarPropertyValue<*>.timestampMs(): Long = timestamp.nanoseconds.inWholeMilliseconds
 
 // API 35 미만 기기에는 getPropertyStatus()가 없어서 deprecated된 getStatus()를 쓴다.

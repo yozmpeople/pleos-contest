@@ -7,14 +7,18 @@ import com.yozmpeople.dontspill.common.debugLog
 import com.yozmpeople.dontspill.data.driving.local.DrivingDao
 import com.yozmpeople.dontspill.data.driving.local.DrivingEntity
 import com.yozmpeople.dontspill.data.driving.model.DrivingState
+import com.yozmpeople.dontspill.data.location.LocationRepository
 import com.yozmpeople.dontspill.data.vehicle.VehicleSignalRepository
 import com.yozmpeople.dontspill.data.vehicle.model.VehicleReading
+import com.yozmpeople.dontspill.domain.driving.DrivingDistanceAccumulator
 import com.yozmpeople.dontspill.domain.score.DrivingScoreCalculator
 import com.yozmpeople.dontspill.domain.score.DrivingScoreInput
 import com.yozmpeople.dontspill.domain.score.DrivingScoreResult
+import com.yozmpeople.dontspill.ui.character.CharacterRepository
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
@@ -31,11 +35,16 @@ import kotlinx.serialization.json.Json
 
 private const val TAG = "DrivingRecorder"
 
+// 감점이 없어도 이 간격마다 점수와 거리를 저장한다. 앱이 주행 중에 꺼져도 잃는 기록을 줄인다.
+private val PROGRESS_SAVE_INTERVAL_MS = 10.seconds.inWholeMilliseconds
+
 // 주행 상태에 따라 드라이빙을 시작·종료하고, 주행 중 점수를 계산해 Room에 저장한다.
 @Singleton
 class DrivingRecorder @Inject constructor(
     private val drivingDetector: DrivingDetector,
     private val vehicleSignalRepository: VehicleSignalRepository,
+    private val locationRepository: LocationRepository,
+    private val characterRepository: CharacterRepository,
     private val drivingDao: DrivingDao,
     private val clock: ElapsedRealtimeClock,
     private val wallClock: WallClock,
@@ -55,6 +64,11 @@ class DrivingRecorder @Inject constructor(
         }
     }
 
+    // 사용자가 주행 중 화면에서 종료를 누를 때. 주행 상태가 대기로 바뀌면 진행 중인 기록이 끝난다.
+    fun endDriving() {
+        drivingDetector.endDriving()
+    }
+
     // 주행 중이면 지금 시각으로 드라이빙을 끝낸다.
     fun stop() {
         job?.cancel()
@@ -65,6 +79,7 @@ class DrivingRecorder @Inject constructor(
     private suspend fun record(driving: DrivingState.Driving) {
         val drivingId = UUID.randomUUID().toString()
         val calculator = DrivingScoreCalculator(driving.startedAtMs, vehicleSignalRepository.readWheelbaseM())
+        val distance = DrivingDistanceAccumulator()
         try {
             val initial = calculator.result()
             drivingDao.insert(
@@ -73,41 +88,55 @@ class DrivingRecorder @Inject constructor(
                     startedAtMs = toEpochMs(driving.startedAtMs),
                     endedAtMs = null,
                     score = initial.score,
+                    character = characterRepository.selected.value.name,
+                    distanceMeters = 0.0,
                     penaltyCounts = encodeCounts(initial),
                     resultShown = false
                 )
             )
             debugLog(TAG) { "드라이빙 시작" }
-            collectInputs(driving.startedAtMs, calculator, initial) { result ->
-                drivingDao.updateScore(drivingId, result.score, encodeCounts(result))
+            collectInputs(driving.startedAtMs, calculator, distance, initial) { result ->
+                drivingDao.updateProgress(drivingId, result.score, encodeCounts(result), distance.totalMeters)
             }
         } finally {
-            // 대기로 바뀐 시각(P 진입, 시동 OFF)을 종료 시각으로 쓴다.
+            // 대기로 바뀐 시각(P 진입, 사용자 종료)을 종료 시각으로 쓴다.
             val endedAtMs = clock.nowMs()
             val result = calculator.finish(endedAtMs)
             withContext(NonCancellable) {
-                drivingDao.finish(drivingId, toEpochMs(endedAtMs), result.score, encodeCounts(result))
+                drivingDao.finish(
+                    drivingId = drivingId,
+                    endedAtMs = toEpochMs(endedAtMs),
+                    score = result.score,
+                    penaltyCounts = encodeCounts(result),
+                    distanceMeters = distance.totalMeters
+                )
             }
             debugLog(TAG) { "드라이빙 종료: 점수 ${result.score}" }
         }
     }
 
-    // 차속 이벤트마다 나머지 신호의 최신 값으로 입력 1건을 넣는다 (05 지시서 "수집 주기")
-    // 점수와 횟수는 감점이 확정될 때만 바뀌므로, 횟수가 바뀌었을 때만 저장한다.
+    // 차속 이벤트마다 나머지 신호의 최신 값으로 입력 1건을 넣는다
+    // 감점 횟수가 바뀌었거나 저장한 지 PROGRESS_SAVE_INTERVAL_MS가 지나면 저장한다.
     private suspend fun collectInputs(
         startedAtMs: Long,
         calculator: DrivingScoreCalculator,
+        distance: DrivingDistanceAccumulator,
         initial: DrivingScoreResult,
-        onCountsChanged: suspend (DrivingScoreResult) -> Unit
+        onProgress: suspend (DrivingScoreResult) -> Unit
     ): Unit = coroutineScope {
         val speedLimitKmh = vehicleSignalRepository.speedLimitKmh.latestIn(this)
         val lowBeamOn = vehicleSignalRepository.lowBeamOn.latestIn(this)
         val highBeamOn = vehicleSignalRepository.highBeamOn.latestIn(this)
         val wipersOn = vehicleSignalRepository.frontWipersOn.latestIn(this)
         val frontWheelAngleDeg = vehicleSignalRepository.frontWheelAngleDeg.latestIn(this)
+        // 위치 점이 올 때마다 거리를 더한다. 좌표는 로그에 남기지 않는다.
+        launch {
+            locationRepository.location.collect { distance.add(it.latitudeDeg, it.longitudeDeg) }
+        }
 
         var lastTimestampMs = startedAtMs
         var savedCounts = initial.counts
+        var savedAtMs = startedAtMs
         vehicleSignalRepository.speedMps.collect { speed ->
             // 계산기는 시간순 입력을 전제로 한다. 시작 전 값(replay)과 순서가 뒤바뀐 값은 넣지 않는다.
             if (speed.timestampMs <= lastTimestampMs) return@collect
@@ -125,9 +154,10 @@ class DrivingRecorder @Inject constructor(
                     frontWheelAngleDeg = frontWheelAngleDeg.value
                 )
             )
-            if (result.counts != savedCounts) {
+            if (result.counts != savedCounts || speed.timestampMs - savedAtMs >= PROGRESS_SAVE_INTERVAL_MS) {
                 savedCounts = result.counts
-                onCountsChanged(result)
+                savedAtMs = speed.timestampMs
+                onProgress(result)
             }
         }
     }

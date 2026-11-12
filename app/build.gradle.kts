@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -8,6 +10,12 @@ plugins {
 }
 
 val targetAndroidSdk = 35
+
+val keystorePropertiesFile = File(System.getProperty("user.home"), ".dontspill-secrets/keystore.properties")
+val keystoreProperties = Properties().apply {
+    if (keystorePropertiesFile.exists()) keystorePropertiesFile.inputStream().use { load(it) }
+}
+val hasReleaseKeystore = keystorePropertiesFile.exists()
 
 android {
     namespace = "com.yozmpeople.dontspill"
@@ -28,11 +36,23 @@ android {
     // CarPropertyManager, CarPowerManager 등 AAOS 표준 API
     useLibrary("android.car")
 
+    signingConfigs {
+        if (hasReleaseKeystore) {
+            create("release") {
+                storeFile = file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
             optimization {
                 enable = false
             }
+            if (hasReleaseKeystore) signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
@@ -49,6 +69,16 @@ android {
         unitTests.isReturnDefaultValues = true
     }
 }
+
+// 서명 키가 없으면 서명되지 않은 release APK가 만들어지지 않게 release 빌드를 멈춘다. debug 빌드는 그대로 된다.
+val checkReleaseKeystore = tasks.register("checkReleaseKeystore") {
+    val keystoreFound = hasReleaseKeystore
+    val keystorePath = keystorePropertiesFile.path
+    doLast {
+        if (!keystoreFound) throw GradleException("release 서명 정보가 없습니다: $keystorePath")
+    }
+}
+tasks.matching { it.name == "preReleaseBuild" }.configureEach { dependsOn(checkReleaseKeystore) }
 
 // Room DB 스키마를 JSON으로 남긴다. 버전을 올릴 때 마이그레이션을 비교하는 기준이다.
 room3 {

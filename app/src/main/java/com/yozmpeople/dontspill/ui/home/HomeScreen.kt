@@ -1,7 +1,16 @@
 package com.yozmpeople.dontspill.ui.home
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,6 +36,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -35,6 +45,7 @@ import androidx.compose.ui.zIndex
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.yozmpeople.dontspill.R
+import com.yozmpeople.dontspill.common.PleosLandscapePreviews
 import com.yozmpeople.dontspill.common.PleosPortraitPreviews
 import com.yozmpeople.dontspill.ui.character.Character
 import com.yozmpeople.dontspill.ui.component.AppContentFrame
@@ -44,11 +55,15 @@ import com.yozmpeople.dontspill.ui.component.ImagePanel
 import com.yozmpeople.dontspill.ui.component.InfoGuide
 import com.yozmpeople.dontspill.ui.component.WindowLayout
 import com.yozmpeople.dontspill.ui.component.currentWindowLayout
+import com.yozmpeople.dontspill.ui.component.pressScaleClickable
 import com.yozmpeople.dontspill.ui.component.scaled
 import com.yozmpeople.dontspill.ui.theme.ChaduckColors
 import com.yozmpeople.dontspill.ui.theme.ChaduckTheme
 import com.yozmpeople.dontspill.ui.theme.textBold
 import com.yozmpeople.dontspill.ui.theme.textTitle
+
+// 캐릭터를 바꿀 때 애니메이션 시간
+private const val CHARACTER_TRANSITION_MS = 300
 
 // 가로·세로 시안에서 크기만 다른 요소의 수치
 private class HomeDimens(
@@ -64,7 +79,6 @@ private class HomeDimens(
     val guideFontSize: TextUnit
 )
 
-// 시안 수치 (사용자, 2026-11-11)
 private val LandscapeDimens = HomeDimens(
     scorePanelSize = DpSize(573.dp, 126.dp),
     scoreTextStartPadding = 50.dp,
@@ -78,7 +92,6 @@ private val LandscapeDimens = HomeDimens(
     guideFontSize = 32.sp
 )
 
-// 세로 시안 수치 (사용자, 2026-11-11)
 private val PortraitDimens = HomeDimens(
     scorePanelSize = DpSize(539.dp, 118.dp),
     scoreTextStartPadding = 40.dp,
@@ -92,7 +105,6 @@ private val PortraitDimens = HomeDimens(
     guideFontSize = 26.sp
 )
 
-// 시안 수치 (사용자, 2026-11-11)
 private val SpeechBubbleSize = DpSize(415.dp, 114.dp)
 private val SelectedCharacterSize = 500.dp
 private val SideCharacterSize = 350.dp
@@ -104,26 +116,29 @@ private val GuideTopSpacing = 73.dp
 private val TopButtonSpacing = 8.dp
 private val SpeechBubbleTopSpacing = 80.dp
 
-// 세로 화면은 공통 여백 대신 홈 시안의 여백을 쓴다 (사용자, 2026-11-11)
+// 세로 화면은 공통 여백 대신 홈 시안의 여백을 쓴다
 private val PortraitPaddingTop = 42.dp
 private val PortraitPaddingBottom = 70.dp
 private val PortraitPaddingHorizontal = 37.dp
 
-// 세로 시안 간격 (사용자, 2026-11-11)
 private val PortraitSpeechBubbleTopSpacing = 138.dp
 private val PortraitNameRowTopSpacing = 27.dp
 private val PortraitGuideTopSpacing = 66.dp
 
-// 말풍선이 가운데 캐릭터 이미지 위쪽과 겹친다. 캐릭터 이미지 안쪽 여백 때문이다 (사용자, 2026-11-11, 시안 눈대중)
+// 말풍선이 가운데 캐릭터 이미지 위쪽과 겹친다. 캐릭터 이미지 안쪽 여백 때문이다
 private val SpeechBubbleOverlap = 30.dp
 
-// 캐릭터와 이름표 사이 최소 간격 (사용자, 2026-11-11)
+// 캐릭터와 이름표 사이 최소 간격
 private val NameRowMinSpacing = 1.dp
 
-// 점수 패널 오른쪽은 트로피 자리라 글자는 왼쪽부터 놓는다. 위아래는 가운데다(가로 31, 세로 30). (사용자, 2026-11-11)
+// 점수 패널 오른쪽은 트로피 자리라 글자는 왼쪽부터 놓는다. 위아래는 가운데다(가로 31, 세로 30).
 private val ScoreTextSpacing = 16.dp
 
-// 시안 수치 (사용자, 2026-11-11)
+// 말풍선 이미지 아래쪽은 꼬리라 글자 세로 위치는 위 여백으로 정한다. 가로는 가운데다
+// 이미지 높이(114dp)의 가운데에 두면 꼬리 때문에 몸통보다 아래로 처진다
+// 몸통은 이미지 위 약 5dp~91dp라 몸통 가운데(약 48dp)와 글자 가운데(30 + 32 / 2 = 46dp)가 거의 같다
+private val SpeechTextTopPadding = 30.dp
+
 private val SpeechFontSize = 32.sp
 private val SpeechLineHeight = 32.sp
 
@@ -259,10 +274,16 @@ private fun PortraitHomeContent(
                     .fillMaxWidth(),
                 contentAlignment = Alignment.TopCenter
             ) {
-                SelectedCharacter(
-                    character = uiState.character,
-                    modifier = Modifier.aspectRatio(1f, matchHeightConstraintsFirst = true)
-                )
+                AnimatedContent(
+                    targetState = uiState.character,
+                    transitionSpec = { slideByDirection() },
+                    label = "selectedCharacter"
+                ) { character ->
+                    SelectedCharacter(
+                        character = character,
+                        modifier = Modifier.aspectRatio(1f, matchHeightConstraintsFirst = true)
+                    )
+                }
             }
             Spacer(Modifier.height(PortraitNameRowTopSpacing.scaled))
             CharacterNameRow(uiState.character, dimens, onPrevious, onNext)
@@ -324,7 +345,7 @@ private fun TopButtons(dimens: HomeDimens, onClick: (HomeTopButton) -> Unit) {
             contentDescription = stringResource(button.descriptionRes),
             modifier = Modifier
                 .size(dimens.topButtonSize.scaled)
-                .clickable(onClick = { onClick(button) })
+                .pressScaleClickable { onClick(button) }
         )
     }
 }
@@ -332,29 +353,61 @@ private fun TopButtons(dimens: HomeDimens, onClick: (HomeTopButton) -> Unit) {
 @Composable
 private fun SpeechBubble(text: String, modifier: Modifier = Modifier) {
     ImagePanel(R.drawable.img_panel_speechbubble, SpeechBubbleSize, modifier) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.textBold.copy(
-                fontSize = SpeechFontSize,
-                lineHeight = SpeechLineHeight,
-                textAlign = TextAlign.Center
-            ).scaled(),
-            color = ChaduckColors.Primary.Normal
-        )
+        // 바뀌는 동안 길이가 다른 두 문구가 겹쳐도 치우치지 않게 말풍선 전체를 채우고 가로 가운데에 놓는다.
+        Crossfade(
+            targetState = text,
+            modifier = Modifier.fillMaxSize(),
+            animationSpec = tween(CHARACTER_TRANSITION_MS),
+            label = "speech"
+        ) { text ->
+            SpeechText(text)
+        }
     }
 }
 
+@Composable
+private fun SpeechText(text: String) {
+    Text(
+        text = text,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = SpeechTextTopPadding.scaled),
+        style = MaterialTheme.typography.textBold.copy(
+            fontSize = SpeechFontSize,
+            lineHeight = SpeechLineHeight,
+            textAlign = TextAlign.Center
+        ).scaled(),
+        color = ChaduckColors.Primary.Normal
+    )
+}
+
 // 고른 캐릭터는 가운데에 크게, 이전·다음 캐릭터는 양옆에 작고 옅게 그린다. 세 캐릭터의 위쪽을 맞춘다.
+// 캐릭터를 바꾸면 세 캐릭터가 한 묶음으로 누른 방향으로 밀린다.
 @Composable
 private fun CharacterCarousel(uiState: HomeUiState) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(CarouselSpacing.scaled),
-        verticalAlignment = Alignment.Top
-    ) {
-        SideCharacter(uiState.previousCharacter)
-        SelectedCharacter(uiState.character, Modifier.size(SelectedCharacterSize.scaled))
-        SideCharacter(uiState.nextCharacter)
+    AnimatedContent(
+        targetState = uiState.character,
+        transitionSpec = { slideByDirection() },
+        label = "characterCarousel"
+    ) { character ->
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(CarouselSpacing.scaled),
+            verticalAlignment = Alignment.Top
+        ) {
+            SideCharacter(character.previous())
+            SelectedCharacter(character, Modifier.size(SelectedCharacterSize.scaled))
+            SideCharacter(character.next())
+        }
     }
+}
+
+// 다음(▶)을 누르면 왼쪽으로, 이전(◀)을 누르면 오른쪽으로 밀린다. 한 칸만큼(너비의 1/3) 밀며 흐려진다.
+private fun AnimatedContentTransitionScope<Character>.slideByDirection(): ContentTransform {
+    val direction = if (targetState == initialState.next()) 1 else -1
+    val spec = tween<IntOffset>(CHARACTER_TRANSITION_MS)
+    val fade = tween<Float>(CHARACTER_TRANSITION_MS)
+    return (slideInHorizontally(spec) { it / 3 * direction } + fadeIn(fade))
+        .togetherWith(slideOutHorizontally(spec) { -it / 3 * direction } + fadeOut(fade))
 }
 
 @Composable
@@ -390,18 +443,33 @@ private fun CharacterNameRow(character: Character, dimens: HomeDimens, onPreviou
             onPrevious
         )
         ImagePanel(R.drawable.img_panel_title, dimens.namePanelSize) {
-            Text(
-                text = stringResource(character.displayNameRes),
-                style = MaterialTheme.typography.textTitle.copy(
-                    fontSize = dimens.nameFontSize,
-                    lineHeight = dimens.nameFontSize,
-                    textAlign = TextAlign.Center
-                ).scaled(),
-                color = ChaduckColors.Primary.Normal
-            )
+            // 말풍선과 같은 이유로 이름표 전체를 채우고 가운데에 놓는다.
+            Crossfade(
+                targetState = character,
+                modifier = Modifier.fillMaxSize(),
+                animationSpec = tween(CHARACTER_TRANSITION_MS),
+                label = "name"
+            ) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CharacterName(it, dimens)
+                }
+            }
         }
         ImageButton(R.drawable.img_button_next, stringResource(R.string.home_next_character), ArrowButtonSize, onNext)
     }
+}
+
+@Composable
+private fun CharacterName(character: Character, dimens: HomeDimens) {
+    Text(
+        text = stringResource(character.displayNameRes),
+        style = MaterialTheme.typography.textTitle.copy(
+            fontSize = dimens.nameFontSize,
+            lineHeight = dimens.nameFontSize,
+            textAlign = TextAlign.Center
+        ).scaled(),
+        color = ChaduckColors.Primary.Normal
+    )
 }
 
 @Composable
@@ -421,7 +489,8 @@ private fun HomePreviewFrame(character: Character) {
     }
 }
 
-@PleosPortraitPreviews
+//@PleosPortraitPreviews
+@PleosLandscapePreviews
 @Composable
 private fun HomeContentPreview() {
     HomePreviewFrame(Character.entries.first())

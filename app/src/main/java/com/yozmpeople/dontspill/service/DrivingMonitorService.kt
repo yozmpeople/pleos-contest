@@ -106,8 +106,22 @@ class DrivingMonitorService : Service() {
     companion object {
         // 화면이 떠 있을 때 부른다. 위치 권한은 "앱 사용 중에만 허용"이어도 된다
         fun startFromForeground(context: Context) {
-            val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
-                PackageManager.PERMISSION_GRANTED
+            startIfGranted(context, Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+
+        // 부팅 뒤 화면 없이 부른다. 화면 없이 위치 서비스를 띄우려면 "항상 허용"이 있어야 한다.
+        fun startFromBackground(context: Context) {
+            startIfGranted(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+            )
+        }
+
+        private fun startIfGranted(context: Context, vararg permissions: String) {
+            val granted = permissions.all {
+                ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+            }
             if (!granted) {
                 debugLog(TAG) { "위치 권한이 없어 서비스를 시작하지 않음" }
                 return

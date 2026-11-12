@@ -56,6 +56,12 @@ class MainActivity : ComponentActivity() {
             onPermissionsResolved()
         }
 
+    // 앱 사용 중 위치를 허용한 뒤에만 요청할 수 있다. 시스템 설정 화면에서 "항상 허용"을 고른다.
+    private val backgroundLocationLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            debugLog(TAG) { "background location $granted" }
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -67,10 +73,21 @@ class MainActivity : ComponentActivity() {
         if (granted) onPermissionsResolved() else permissionLauncher.launch(REQUIRED_PERMISSIONS)
     }
 
-    // 임시: 서비스 시작 지점(부팅 자동 / 캐릭터 선택)을 정한 뒤 바꾼다.
     private fun onPermissionsResolved() {
         logVehicleSignals()
         DrivingMonitorService.startFromForeground(this)
+        requestBackgroundLocation()
+    }
+
+    // 부팅 뒤 앱을 열지 않아도 주행을 기록하려면 "항상 허용"이 필요하다.
+    private fun requestBackgroundLocation() {
+        val foregroundGranted =
+            checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        val backgroundGranted =
+            checkSelfPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED
+        if (foregroundGranted && !backgroundGranted) {
+            backgroundLocationLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+        }
     }
 
     // 권한 요청 뒤에 구독한다. 권한 없이 먼저 등록하면 AAOS 신호는 등록되지 않은 채로 남는다.

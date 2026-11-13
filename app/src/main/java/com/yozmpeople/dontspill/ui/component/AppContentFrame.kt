@@ -19,8 +19,8 @@ import com.yozmpeople.dontspill.common.PleosPreviews
 import com.yozmpeople.dontspill.ui.theme.ChaduckTheme
 
 // 모든 화면에 공통인 바깥 여백. 시안(S-17) 값이고 배율을 곱해 쓴다.
-private val ScreenPaddingHorizontal = 100.dp
-private val ScreenPaddingVertical = 90.dp
+private val ScreenPaddingHorizontal = 90.dp
+private val ScreenPaddingVertical = 80.dp
 
 // 모든 화면을 감싸는 틀. 시스템 바·컷아웃 인셋 안쪽에서 배율을 정해 내려 준다.
 // 배경은 여백을 받지 않고 틀 전체를 채운다. 배경 Composable에는 Modifier.matchParentSize()를 건다.

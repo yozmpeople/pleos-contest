@@ -123,6 +123,9 @@ private val PortraitDimens = LeaderboardDimens(
     myRankingHeight = 170.dp
 )
 
+// 세로 화면 좌우 여백은 도움말 세로 화면과 같게 맞춘다
+private val PortraitPaddingHorizontal = 60.dp
+
 // 하단 '내 순위' 영역 아래 모서리. 화면 모서리와 같게 둥글린다
 private val MyRankingCornerRadius = 40.dp
 
@@ -156,13 +159,19 @@ fun LeaderboardContent(
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val dimens = when (currentWindowLayout()) {
-        WindowLayout.Landscape -> LandscapeDimens
-        WindowLayout.Portrait -> PortraitDimens
-    }
+    val isLandscape = currentWindowLayout() == WindowLayout.Landscape
+    val dimens = if (isLandscape) LandscapeDimens else PortraitDimens
     val layoutDirection = LocalLayoutDirection.current
-    val paddingStart = contentPadding.calculateStartPadding(layoutDirection)
-    val paddingEnd = contentPadding.calculateEndPadding(layoutDirection)
+    val paddingStart = if (isLandscape) {
+        contentPadding.calculateStartPadding(layoutDirection)
+    } else {
+        PortraitPaddingHorizontal.scaled
+    }
+    val paddingEnd = if (isLandscape) {
+        contentPadding.calculateEndPadding(layoutDirection)
+    } else {
+        PortraitPaddingHorizontal.scaled
+    }
     Box(modifier = modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -340,8 +349,8 @@ private fun Score(score: Int, dimens: LeaderboardDimens) {
     )
 }
 
-@PleosLandscapePreviews
-//@PleosPortraitPreviews
+// @PleosLandscapePreviews
+@PleosPortraitPreviews
 @Composable
 private fun LeaderboardPreview() {
     val character = Character.Tofu

@@ -82,7 +82,7 @@ private val PortraitPaddingBottom = 66.dp
 
 // 배경은 AppContentFrame이 그린다. 가로·세로 모두 요소를 가로 가운데에 세로로 쌓고, 수치와 여백만 다르다.
 // 캐릭터는 여백 안에서 다른 요소를 놓고 남는 높이를 다 채운다. 너비에 막히면 그 크기에서 멈춘다.
-// 가로 시안은 수치를 다 더하면 여백 안 높이보다 10dp 커서, 시안 화면에서는 캐릭터가 540dp보다 조금 작다.
+// 가로 시안은 수치를 다 더하면 여백 안 높이보다 10dp 작아서, 시안 화면에서는 캐릭터가 540dp보다 조금 크다.
 @Composable
 fun DrivingContent(
     uiState: DrivingUiState,
@@ -141,14 +141,9 @@ private fun DrivingPreviewFrame() {
     }
 }
 
-// @PleosLandscapePreviews
-// @Composable
-// private fun DrivingContentLandscapePreview() {
-//    DrivingPreviewFrame()
-// }
-
-@PleosPortraitPreviews
+// @PleosPortraitPreviews
+@PleosLandscapePreviews
 @Composable
-private fun DrivingContentPortraitPreview() {
+private fun DrivingContentPreview() {
     DrivingPreviewFrame()
 }

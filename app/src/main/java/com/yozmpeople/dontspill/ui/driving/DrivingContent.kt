@@ -59,8 +59,6 @@ private val LandscapeDimens = DrivingDimens(
     guideFontSize = 32.sp
 )
 
-// 시안대로 더하면 1220dp로 세로 시안 높이(1184dp)를 36dp 넘는다. 캐릭터 540dp를 지키려고
-// 여백과 간격 5개를 같은 비율(약 0.91)로 줄였다. 시안 값: 위 128, 캐릭터 위 89, 버튼 위 50, 안내 위 70, 아래 73
 private val PortraitDimens = DrivingDimens(
     timePanelSize = DpSize(421.dp, 104.dp),
     timeFontSize = 44.sp,
@@ -77,12 +75,8 @@ private val PortraitDimens = DrivingDimens(
 private val PortraitPaddingTop = 117.dp
 private val PortraitPaddingBottom = 66.dp
 
-// 글자는 패널 가운데에 놓는다. 가로 시안 여백(주행 시간 가로 130·세로 35, 종료 버튼 가로 120·세로 60)도
-// 가운데 정렬과 같은 결과다
-
 // 배경은 AppContentFrame이 그린다. 가로·세로 모두 요소를 가로 가운데에 세로로 쌓고, 수치와 여백만 다르다.
 // 캐릭터는 여백 안에서 다른 요소를 놓고 남는 높이를 다 채운다. 너비에 막히면 그 크기에서 멈춘다.
-// 가로 시안은 수치를 다 더하면 여백 안 높이보다 10dp 작아서, 시안 화면에서는 캐릭터가 540dp보다 조금 크다.
 @Composable
 fun DrivingContent(
     uiState: DrivingUiState,

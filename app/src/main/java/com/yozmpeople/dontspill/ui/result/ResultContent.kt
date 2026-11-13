@@ -72,7 +72,7 @@ private val LandscapeDimens = ResultDimens(
     homeButtonSize = DpSize(512.dp, 170.dp),
     homeButtonFontSize = 48.sp,
     finalScoreFontSize = 54.sp,
-    scoreTopSpacing = 16.dp,
+    scoreTopSpacing = 20.dp,
     scoreFontSize = 116.sp,
     infoTopSpacing = 80.dp,
     infoFontSize = 44.sp,
@@ -296,7 +296,7 @@ private fun infoStyle(base: TextStyle, dimens: ResultDimens): TextStyle =
 
 // 시안 예시 점수: 99점 PERFECT, 75점 GOOD, 68점 BAD
 @Composable
-private fun ResultPreviewFrame(score: Int) {
+private fun ResultPreviewFrame(score: Int, drivingSeconds: Long = 0) {
     val character = Character.WaterCup
     ChaduckTheme {
         AppContentFrame(
@@ -306,7 +306,7 @@ private fun ResultPreviewFrame(score: Int) {
                 uiState = ResultUiState(
                     character = character,
                     score = score,
-                    drivingSeconds = 0,
+                    drivingSeconds = drivingSeconds,
                     distanceMeters = 1_700
                 ),
                 contentPadding = contentPadding,
@@ -316,19 +316,19 @@ private fun ResultPreviewFrame(score: Int) {
     }
 }
 
-//@PleosLandscapePreviews
-////@PleosPortraitPreviews
-//@Composable
-//private fun ResultPerfectPreview() {
-//    ResultPreviewFrame(score = 99)
-//}
-
 @PleosLandscapePreviews
 //@PleosPortraitPreviews
 @Composable
-private fun ResultGoodPreview() {
-    ResultPreviewFrame(score = 75)
+private fun ResultPerfectPreview() {
+    ResultPreviewFrame(score = 96, drivingSeconds = 754)
 }
+
+//@PleosLandscapePreviews
+////@PleosPortraitPreviews
+//@Composable
+//private fun ResultGoodPreview() {
+//    ResultPreviewFrame(score = 75)
+//}
 
 //@PleosLandscapePreviews
 //@PleosPortraitPreviews

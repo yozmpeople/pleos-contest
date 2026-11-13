@@ -40,6 +40,8 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yozmpeople.dontspill.R
+import com.yozmpeople.dontspill.common.PleosLandscapePreviews
+import com.yozmpeople.dontspill.common.PleosPortraitPreviews
 import com.yozmpeople.dontspill.common.PleosPreviews
 import com.yozmpeople.dontspill.ui.character.Character
 import com.yozmpeople.dontspill.ui.component.AppContentFrame
@@ -120,7 +122,7 @@ private val PortraitDimens = HelpDimens(
 )
 
 // 세로 화면은 공통 여백 대신 따로 정한 여백을 쓴다
-private val PortraitPaddingTop = 84.dp
+private val PortraitPaddingTop = 80.dp
 private val PortraitPaddingBottom = 30.dp
 private val PortraitPaddingHorizontal = 60.dp
 
@@ -300,7 +302,8 @@ private fun HelpPreviewFrame(page: HelpPage) {
     }
 }
 
-@PleosPreviews
+//@PleosLandscapePreviews
+@PleosPortraitPreviews
 @Composable
 private fun HelpSkinPreview() {
     HelpPreviewFrame(HelpPage.Skin)

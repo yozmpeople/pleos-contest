@@ -13,6 +13,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -36,10 +37,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -110,6 +112,7 @@ private val SelectedCharacterSize = 500.dp
 private val SideCharacterSize = 350.dp
 private val SideCharacterAlpha = 0.6f
 private val CarouselSpacing = 75.dp
+private val CarouselWidth = SideCharacterSize * 2 + CarouselSpacing * 2 + SelectedCharacterSize
 private val ArrowButtonSize = DpSize(81.dp, 80.dp)
 private val GuideTopSpacing = 73.dp
 
@@ -128,8 +131,8 @@ private val PortraitGuideTopSpacing = 66.dp
 // 말풍선이 가운데 캐릭터 이미지 위쪽과 겹친다. 캐릭터 이미지 안쪽 여백 때문이다
 private val SpeechBubbleOverlap = 30.dp
 
-// 캐릭터와 이름표 사이 최소 간격
-private val NameRowMinSpacing = 1.dp
+// 이름표가 가운데 캐릭터 이미지 아래쪽과 겹친다. 이미지 아래 투명 여백(약 64~72dp) 안쪽이라 그림은 가리지 않는다
+private val NameRowOverlap = 30.dp
 
 // 점수 패널 오른쪽은 트로피 자리라 글자는 왼쪽부터 놓는다. 위아래는 가운데다(가로 31, 세로 30).
 private val ScoreTextSpacing = 16.dp
@@ -215,21 +218,47 @@ private fun LandscapeHomeContent(
             }
         }
         Spacer(Modifier.height(SpeechBubbleTopSpacing.scaled))
-        // 캐릭터와 겹치는 만큼 차지하는 높이를 줄이고, 캐릭터보다 위에 그린다.
-        SpeechBubble(
-            text = stringResource(uiState.character.speechRes),
+        LandscapeCharacterStage(
+            uiState = uiState,
             modifier = Modifier
-                .overlapBottom(SpeechBubbleOverlap.scaled)
-                .zIndex(1f)
+                .weight(1f)
+                .fillMaxWidth()
         )
-        CharacterCarousel(uiState)
-        // 캐릭터 이미지 안쪽에 여백이 있어 시안에서는 이름표가 거의 붙어 있다.
-        // 세로가 긴 화면에서 남는 공간은 여기로 받아 캐릭터가 아래로 처지지 않게 한다.
-        Spacer(Modifier.height(NameRowMinSpacing.scaled))
-        Spacer(Modifier.weight(1f))
         CharacterNameRow(uiState.character, dimens, onPrevious, onNext)
         Spacer(Modifier.height(GuideTopSpacing.scaled))
         InfoGuide(stringResource(R.string.home_guide), dimens.guideIconSize, dimens.guideFontSize)
+    }
+}
+
+// 말풍선과 캐릭터 묶음. 남는 높이로 캐릭터를 키우고, 가로 폭에 막히면 그 크기에서 멈춘다.
+// 그래도 남는 높이는 말풍선 위와 캐릭터 아래에 반씩 둔다.
+@Composable
+private fun LandscapeCharacterStage(uiState: HomeUiState, modifier: Modifier = Modifier) {
+    BoxWithConstraints(modifier = modifier) {
+        val speechHeight = (SpeechBubbleSize.height - SpeechBubbleOverlap).scaled
+        val nameRowOverlapRatio = NameRowOverlap / SelectedCharacterSize
+        val heightLimit = (maxHeight - speechHeight) / (1f - nameRowOverlapRatio)
+        val widthLimit = maxWidth * (SelectedCharacterSize / CarouselWidth)
+        val selectedSize = min(heightLimit, widthLimit).coerceAtLeast(0.dp)
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(Modifier.weight(1f))
+            // 캐릭터와 겹치는 만큼 차지하는 높이를 줄이고, 캐릭터보다 위에 그린다.
+            SpeechBubble(
+                text = stringResource(uiState.character.speechRes),
+                modifier = Modifier
+                    .overlapBottom(SpeechBubbleOverlap.scaled)
+                    .zIndex(1f)
+            )
+            CharacterCarousel(
+                uiState = uiState,
+                selectedSize = selectedSize,
+                modifier = Modifier.overlapBottom(selectedSize * nameRowOverlapRatio)
+            )
+            Spacer(Modifier.weight(1f))
+        }
     }
 }
 
@@ -383,20 +412,23 @@ private fun SpeechText(text: String) {
 
 // 고른 캐릭터는 가운데에 크게, 이전·다음 캐릭터는 양옆에 작고 옅게 그린다. 세 캐릭터의 위쪽을 맞춘다.
 // 캐릭터를 바꾸면 세 캐릭터가 한 묶음으로 누른 방향으로 밀린다.
+// 양옆 캐릭터 크기와 간격은 가운데 캐릭터 크기에 시안 비율을 맞춘다.
 @Composable
-private fun CharacterCarousel(uiState: HomeUiState) {
+private fun CharacterCarousel(uiState: HomeUiState, selectedSize: Dp, modifier: Modifier = Modifier) {
+    val ratio = selectedSize / SelectedCharacterSize
     AnimatedContent(
         targetState = uiState.character,
+        modifier = modifier,
         transitionSpec = { slideByDirection() },
         label = "characterCarousel"
     ) { character ->
         Row(
-            horizontalArrangement = Arrangement.spacedBy(CarouselSpacing.scaled),
+            horizontalArrangement = Arrangement.spacedBy(CarouselSpacing * ratio),
             verticalAlignment = Alignment.Top
         ) {
-            SideCharacter(character.previous())
-            SelectedCharacter(character, Modifier.size(SelectedCharacterSize.scaled))
-            SideCharacter(character.next())
+            SideCharacter(character.previous(), SideCharacterSize * ratio)
+            SelectedCharacter(character, Modifier.size(selectedSize))
+            SideCharacter(character.next(), SideCharacterSize * ratio)
         }
     }
 }
@@ -420,12 +452,12 @@ private fun SelectedCharacter(character: Character, modifier: Modifier = Modifie
 }
 
 @Composable
-private fun SideCharacter(character: Character) {
+private fun SideCharacter(character: Character, size: Dp) {
     Image(
         painter = painterResource(character.imageRes),
         contentDescription = null,
         modifier = Modifier
-            .size(SideCharacterSize.scaled)
+            .size(size)
             .alpha(SideCharacterAlpha)
     )
 }
@@ -489,7 +521,7 @@ private fun HomePreviewFrame(character: Character) {
     }
 }
 
-//@PleosPortraitPreviews
+// @PleosPortraitPreviews
 @PleosLandscapePreviews
 @Composable
 private fun HomeContentPreview() {

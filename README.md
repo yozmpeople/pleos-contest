@@ -115,6 +115,6 @@ adb install apk/요즘피플_살살운전대작전_release.apk
 2. Running Devices 화면 상단 도구 막대의 **⋮**(Extended Controls)를 누르고 **Location**을 클릭합니다.
 3. **Routes** 탭에서 **IMPORT GPX/KML**을 눌러 GPX 파일을 선택합니다.
 4. 불러온 경로를 선택하고 **Playback speed**는 1X로 둡니다.
-5. 5-2단계에서 주행을 시작하기 전에 **PLAY ROUTE**를 눌러 경로 재생을 시작하고 가상 콘솔을 이용한 주행을 시작합니다.
+5. 5-2단계에서 주행을 시작하기 전에 **PLAY ROUTE**를 눌러 경로 재생을 시작하고, 지도에서 위치가 서울로 옮겨져 움직이는 것을 확인한 뒤 주행을 시작합니다.
 6. 주행을 마친 후 결과를 확인하고 에뮬레이터의 **STOP ROUTE**를 눌러 경로 재생을 종료합니다.
 
